@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/Button";
 import { ColorfulButton } from "../../components/ui/ColorfulButton";
 import { Alert } from "../../components/ui/Alert";
 import { useAuth } from "../../context/AuthContext";
+import { Spinner } from "../../components/ui/Spinner";
 // no local cache; always fetch from API per requirement
 
 export default function DashboardPage() {
@@ -270,14 +271,14 @@ export default function DashboardPage() {
             <h1 className="text-xl font-semibold capitalize">{activeTab} elections</h1>
             <div className="flex gap-3">
               <Button variant="secondary" onClick={load} className="bg-neutral-800 text-white hover:bg-neutral-900 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-neutral-100 w-36 h-[47px] mt-[1px]">Refresh</Button>
-              <Link href="/elections/new">
+              <Link href="/user/election/new">
                 <ColorfulButton variant="secondary" width="160px">Create election</ColorfulButton>
               </Link>
             </div>
           </div>
           {error && <Alert type="error" message={error} />}
           {loading ? (
-            <div>Loading...</div>
+            <div className="flex items-center justify-center py-10"><Spinner size={18} /><span className="sr-only">Loading</span></div>
           ) : filtered.length ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((e) => (
@@ -313,15 +314,15 @@ export default function DashboardPage() {
                       <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="flex gap-2 pointer-events-auto">
                           {activeTab === "finished" ? (
-                            <Link href={`/elections/${e.electionId}/results`}>
+                            <Link href={`/user/election/${e.electionId}/results`}>
                               <Button size="sm" variant="secondary">Results</Button>
                             </Link>
                           ) : (
-                            <Link href={`/elections/${e.electionId}/edit`}>
+                            <Link href={`/user/election/${e.electionId}/edit`}>
                               <Button size="sm" variant="secondary" disabled={isEditLocked(e.startTime)} title={isEditLocked(e.startTime) ? "Editing locked within 15 minutes of start" : "Edit"}>Edit</Button>
                             </Link>
                           )}
-                          <Link href={`/elections/${e.electionId}`}>
+                          <Link href={`/user/election/${e.electionId}`}>
                             <Button size="sm">View</Button>
                           </Link>
                         </div>

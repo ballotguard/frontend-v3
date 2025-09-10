@@ -2,23 +2,22 @@
 import { useState } from "react";
 import { api } from "../../../lib/api";
 import { Button } from "../../../components/ui/Button";
-import { Alert } from "../../../components/ui/Alert";
+import { useNotifications } from "../../../context/NotificationContext";
 import Link from "next/link";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
-    setError(""); setMessage(""); setLoading(true);
+    setLoading(true);
     try {
       const res = await api.sendResetCode({ email });
-      setMessage(res.message || "Code sent");
+      notifySuccess(res.message || "Code sent");
     } catch (e) {
-      setError(e?.data?.message || e.message);
+      notifyError(e?.data?.message || e.message || "Failed to send code");
     } finally { setLoading(false); }
   }
 
@@ -29,8 +28,7 @@ export default function ForgotPasswordPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">Forgot password</h1>
           <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">We'll send a reset code to your email</p>
         </div>
-        {message && <Alert type="success" message={message} className="mb-4"/>}
-        {error && <Alert type="error" message={error} className="mb-4"/>}
+  {/* Notifications handled globally */}
         <form onSubmit={onSubmit} className="space-y-4">
           <label className="flex flex-col gap-1">
             <span className="text-sm text-neutral-700 dark:text-neutral-300">Email</span>

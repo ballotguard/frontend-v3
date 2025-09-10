@@ -2,7 +2,9 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
+import { NotificationProvider } from "../context/NotificationContext";
 import { NavBar } from "../components/NavBar";
+import { ClientRouteLoadingOverlay } from "../components/RouteLoadingOverlay";
 import { ThemeBackground } from "../components/ThemeBackground";
 import { Footer } from "../components/Footer";
 
@@ -22,18 +24,21 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-  <body className={`${poppins.className} antialiased`}>
-        <ThemeProvider>
-          <AuthProvider>
+  <body className={`${poppins.className} antialiased`} suppressHydrationWarning>
+        <AuthProvider>
+          <ThemeProvider>
+            <NotificationProvider>
             <ThemeBackground>
               <div className="min-h-screen flex flex-col">
                 <NavBar />
+                <ClientRouteLoadingOverlay />
                 <main className="max-w-5xl mx-auto px-4 pt-24 pb-8 flex-1 w-full">{children}</main>
                 <Footer />
               </div>
             </ThemeBackground>
-          </AuthProvider>
-        </ThemeProvider>
+            </NotificationProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

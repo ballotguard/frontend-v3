@@ -11,10 +11,34 @@ export function ColorfulButton({ children, className = "", variant = "secondary"
     minWidth: width
   };
 
+  function handlePointer(e) {
+    const target = e.currentTarget;
+    const rect = target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    // normalized center -0.5..0.5
+    const nx = x / rect.width - 0.5;
+    const ny = y / rect.height - 0.5;
+    target.style.setProperty('--pointer-x', `${nx.toFixed(3)}`);
+    target.style.setProperty('--pointer-y', `${ny.toFixed(3)}`);
+    target.style.setProperty('--pointer-px', `${(x / rect.width) * 100}%`);
+    target.style.setProperty('--pointer-py', `${(y / rect.height) * 100}%`);
+  }
+
+  function resetPointer(e){
+    const target = e.currentTarget;
+    target.style.setProperty('--pointer-x', '0');
+    target.style.setProperty('--pointer-y', '0');
+    target.style.setProperty('--pointer-px', '50%');
+    target.style.setProperty('--pointer-py', '50%');
+  }
+
   return (
-    <button 
-      className={`colorful-button ${variant} ${className}`} 
+    <button
+      className={`colorful-button ${variant} ${className}`}
       style={buttonStyle}
+      onPointerMove={handlePointer}
+      onPointerLeave={resetPointer}
       {...props}
     >
       <div className="wrapper" style={wrapperStyle}>

@@ -3,27 +3,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "../../../lib/api";
 import { Button } from "../../../components/ui/Button";
-import { Alert } from "../../../components/ui/Alert";
+import { useNotifications } from "../../../context/NotificationContext";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [verificationCode, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [loading, setLoading] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
-    setError(""); setMessage(""); setLoading(true);
+    setLoading(true);
     try {
       const res = await api.verifyAndReset({ email, verificationCode, newPassword });
-      setMessage(res.message || "Password reset");
+      notifySuccess(res.message || "Password reset");
       router.replace("/auth/login");
     } catch (e) {
-      setError(e?.data?.message || e.message);
+      notifyError(e?.data?.message || e.message || "Reset failed");
     } finally { setLoading(false); }
   }
 
@@ -34,8 +33,7 @@ export default function ResetPasswordPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">Reset password</h1>
           <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Enter the code and your new password</p>
         </div>
-        {message && <Alert type="success" message={message} className="mb-4"/>}
-        {error && <Alert type="error" message={error} className="mb-4"/>}
+  {/* Notifications handled globally */}
         <form onSubmit={onSubmit} className="space-y-4">
           <label className="flex flex-col gap-1">
             <span className="text-sm text-neutral-700 dark:text-neutral-300">Email</span>

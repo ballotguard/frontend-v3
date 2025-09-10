@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
-import { Alert } from "../../../components/ui/Alert";
+import { useNotifications } from "../../../context/NotificationContext";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -13,18 +13,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [showPassword, setShowPassword] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
-    setError("");
+    // no local error state
     setLoading(true);
     try {
       await login(email, password);
+      notifySuccess("Logged in successfully");
       router.replace("/dashboard");
     } catch (err) {
-      setError(err?.data?.message || err.message);
+      notifyError(err?.data?.message || err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -41,7 +42,7 @@ export default function LoginPage() {
       <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Sign in to continue to Ballotguard</p>
         </div>
 
-        {error && <Alert type="error" message={error} className="mb-4" />}
+  {/* Inline error removed; notifications now handled globally */}
 
         <form onSubmit={onSubmit} className="space-y-4">
           <label className="flex flex-col gap-1">

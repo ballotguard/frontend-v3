@@ -12,62 +12,32 @@
   --foreground: #ededed;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.animate-float { animation: float 6s ease-in-out infinite; }
-.animate-float-delayed { animation: float 7.5s ease-in-out infinite; animation-delay: 0.6s; }
-
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(6px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up { animation: fadeInUp 220ms ease-out; }
-
-/* Ensure transitions are smooth */
-* {
-  transition-property: color, background-color, border-color;
-  transition-duration: 150ms;
-}
-
-/* Make native date input calendar icon white in dark mode (WebKit/Blink) */
-.dark input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1) brightness(1.4);
-  opacity: 0.9;
-}
-
-/* Optional hover feedback */
-.dark input[type="date"]::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
-}
-
-/* Hint native controls to use dark UI where supported */
-.dark input[type="date"] {
-  color-scheme: dark;
-}
-
-/* Colorful Button Styles */
+/* =============================================
+   Colorful Button (Full Recolor + Hover Redesign)
+   ============================================= */
 .colorful-button {
-  --duration: 3s;
+  /* Core timing */
+  --duration: 3.4s;
   --delay: 0s;
   --easing: linear;
-  --c-color-1: rgba(172, 160, 255, 0.15);
-  --c-color-2: rgba(110, 171, 255, 0.15);
-  --c-color-3: rgba(92, 134, 255, 0.5);
-  --c-color-4: rgba(172, 160, 255, 0.15);
-  --c-shadow: rgba(109, 88, 255, 0.25);
-  --c-shadow-inset-top: rgba(172, 160, 255, 0.2);
-  --c-shadow-inset-bottom: rgba(172, 160, 255, 0.5);
-  --c-radial-inner: #6D58FF;
-  --c-radial-outer: #362A89;
+  /* Unified palette (dark base + hero darkest accent #4E74A9) */
+  --accent: #4E74A9;
+  --c-color-1: rgba(109,170,255,0.14);
+  --c-color-2: rgba(109,170,255,0.24);
+  --c-color-3: rgba(109,170,255,0.46);
+  --c-color-4: rgba(157,183,223,0.22);
+  --c-shadow: rgba(78,116,169,0.45);
+  --c-shadow-inset-top: rgba(109,170,255,0.25);
+  --c-shadow-inset-bottom: rgba(109,170,255,0.50);
+  --c-radial-inner: #4E74A9;
+  --c-radial-outer: #2E4662; /* removed black */
+  --c-radial-highlight: #6B8FBD;
   --c-color: #fff;
+  --pointer-x: 0px;
+  --pointer-y: 0px;
+  --pointer-px: 50%;
+  --pointer-py: 50%;
+  --distort-strength: 0.10;
   
   -webkit-tap-highlight-color: transparent;
   -webkit-appearance: none;
@@ -75,7 +45,7 @@ body {
   outline: none;
   position: relative;
   cursor: pointer;
-  border: none;
+  border: 1px solid rgba(109,170,255,0.25);
   display: inline-block;
   border-radius: 8px; /* Changed from 24px to 8px for less rounded corners */
   padding: 0;
@@ -89,22 +59,78 @@ body {
   letter-spacing: 0.02em;
   line-height: 1.5;
   color: var(--c-color);
-  background: radial-gradient(circle, var(--c-radial-inner), var(--c-radial-outer) 80%);
-  box-shadow: 0 0 20px var(--c-shadow);
+  background: radial-gradient(circle at 40% 50%, var(--c-radial-inner) 0%, var(--c-radial-outer) 85%);
+  box-shadow: 0 0 14px -6px var(--c-shadow), 0 0 24px -14px var(--c-radial-highlight);
+  transition: background .3s ease, box-shadow .35s ease;
 }
 
+/* Inner gloss + border halo */
 .colorful-button:before {
   content: '';
-  pointer-events: none;
   position: absolute;
-  z-index: 3;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 8px; /* Changed from 24px to 8px for less rounded corners */
-  box-shadow: inset 0 4px 12px var(--c-shadow-inset-top), inset 0 -4px 6px var(--c-shadow-inset-bottom);
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  /* Removed constant sweeping white gloss; keep only a subtle, pointer-reactive highlight on hover */
+  background: radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(255,255,255,0.28), rgba(255,255,255,0) 55%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0; /* hidden by default */
+  transition: opacity .35s ease;
 }
+
+/* Show subtle highlight only during hover/focus interactions */
+.colorful-button:hover:before,
+.colorful-button:focus-visible:before { opacity: .75; }
+
+/* Watery / ripple overlay following pointer */
+/* Liquid lens highlight */
+.colorful-button:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(255,255,255,0.55), rgba(255,255,255,0) 40%),
+    radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(137,174,224,0.35), rgba(137,174,224,0) 65%);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transform: translateZ(0);
+  transition: opacity .35s ease;
+}
+
+/* Ensure :after glow is completely hidden when not hovering */
+.colorful-button:not(:hover):after {
+  opacity: 0 !important;
+}
+
+/* Enhanced hover: subtle lift + luminous edge + internal highlight */
+.colorful-button:hover:after {
+  opacity: .55;
+  background:
+    radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(255,255,255,0.40), rgba(255,255,255,0) 42%),
+    radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(137,174,224,0.30), rgba(137,174,224,0) 65%);
+}
+.colorful-button:hover {
+  border-color: rgba(137,174,224,0.55);
+  box-shadow:
+    0 3px 6px -2px rgba(20,34,48,0.6),
+    0 0 0 1px rgba(137,174,224,0.25),
+    0 0 22px -6px rgba(137,174,224,0.55),
+    0 0 54px -12px rgba(109,170,255,0.45);
+  /* Removed translate/scale to eliminate post-first-hover jump */
+  transition: box-shadow .35s ease, border-color .25s ease;
+}
+
+/* Focus-visible for keyboard users */
+.colorful-button:focus-visible {
+  outline: 2px solid #89AEE0;
+  outline-offset: 3px;
+}
+
+.colorful-button:active { transform: none; }
 
 .colorful-button .wrapper {
   -webkit-mask-image: -webkit-radial-gradient(white, black);
@@ -126,13 +152,15 @@ body {
   position: absolute;
   left: 0;
   top: 0;
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  filter: blur(var(--blur, 8px));
+  filter: blur(var(--blur, 10px)) brightness(1.05);
   background: var(--background, transparent);
-  transform: translate(var(--x, 0), var(--y, 0)) translateZ(0);
-  animation: var(--animation, none) var(--duration) var(--easing) infinite var(--delay);
+  transform: translate(calc(var(--x, 0) + var(--pointer-x) * var(--distort-strength)), calc(var(--y, 0) + var(--pointer-y) * var(--distort-strength))) translateZ(0);
+  animation: none; /* Disable animations by default to prevent persistent glow */
+  opacity: .9;
+  transition: transform .25s ease, opacity .4s ease;
 }
 
 .colorful-button .circle.circle-1,
@@ -168,11 +196,9 @@ body {
   --animation: circle-1;
 }
 
-.colorful-button .circle.circle-2 {
-  --x: 180px;
-  --y: 8px;
-  --animation: circle-2;
-}
+/* Right bias adjustments: move several circles further to the right */
+/* Right bias retained but tuned for new scale */
+.colorful-button .circle.circle-2 { --x: 205px; --y: 10px; --animation: circle-2; }
 
 .colorful-button .circle.circle-3 {
   --x: -12px;
@@ -180,11 +206,7 @@ body {
   --animation: circle-3;
 }
 
-.colorful-button .circle.circle-4 {
-  --x: 180px;
-  --y: -12px;
-  --animation: circle-4;
-}
+.colorful-button .circle.circle-4 { --x: 215px; --y: -20px; --animation: circle-4; }
 
 .colorful-button .circle.circle-5 {
   --x: 12px;
@@ -192,11 +214,7 @@ body {
   --animation: circle-5;
 }
 
-.colorful-button .circle.circle-6 {
-  --x: 180px;
-  --y: 16px;
-  --animation: circle-6;
-}
+.colorful-button .circle.circle-6 { --x: 220px; --y: 24px; --animation: circle-6; }
 
 .colorful-button .circle.circle-7 {
   --x: 8px;
@@ -216,11 +234,7 @@ body {
   --animation: circle-9;
 }
 
-.colorful-button .circle.circle-10 {
-  --x: 180px;
-  --y: 16px;
-  --animation: circle-10;
-}
+.colorful-button .circle.circle-10 { --x: 228px; --y: 22px; --animation: circle-10; }
 
 .colorful-button .circle.circle-11 {
   --x: 4px;
@@ -228,12 +242,80 @@ body {
   --animation: circle-11;
 }
 
-.colorful-button .circle.circle-12 {
-  --blur: 14px;
-  --x: 180px;
-  --y: 4px;
-  --animation: circle-12;
+.colorful-button .circle.circle-12 { --blur: 18px; --x: 230px; --y: 12px; --animation: circle-12; }
+
+/* Removed hover animation trigger to prevent persistent left-to-right glow */
+/* .colorful-button:hover .circle { animation-duration: var(--duration); } */
+
+/* Secondary variant keeps same palette but subtle brightness tweak */
+.colorful-button.secondary { filter: brightness(1.06) saturate(1.1); }
+
+/* Gradient animation */
+/* Removed gradient shift animation */
+
+/* Light-mode specific lightening of darkest tones to better match hero gradient */
+html:not(.dark) .colorful-button {
+  --c-radial-inner: #6B8FBD; /* lighter center */
+  --c-radial-outer: #4E74A9; /* hero base */
+  --c-radial-highlight: #9DB7DF; /* lighter highlight */
+  --c-shadow: rgba(110,140,180,0.35);
+  border-color: rgba(110,140,180,0.40);
+  background: radial-gradient(circle at 40% 50%, var(--c-radial-inner) 0%, var(--c-radial-outer) 85%);
+  box-shadow: 0 0 10px -4px rgba(110,140,180,0.45), 0 0 20px -10px rgba(157,183,223,0.50);
 }
+html:not(.dark) .colorful-button:hover {
+  border-color: rgba(110,140,180,0.65);
+  box-shadow:
+    0 3px 6px -2px rgba(60,86,120,0.30),
+    0 0 0 1px rgba(110,140,180,0.30),
+    0 0 26px -8px rgba(137,174,224,0.60),
+    0 0 54px -12px rgba(157,183,223,0.55);
+}
+
+/* =============================================
+   Nav link subtle hover underline / bg effect
+   ============================================= */
+.nav-link {
+  position: relative;
+  padding: 0.4rem 0.55rem;
+  border-radius: 6px;
+  line-height: 1.1;
+  font-weight: 500;
+  transition: color .25s ease, background-color .25s ease;
+}
+
+.nav-link:after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 4px;
+  height: 2px;
+  background: linear-gradient(90deg,#4E74A9,#6B8FBD);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: 25% 50%;
+  transition: transform .35s cubic-bezier(.65,.05,.36,1);
+  pointer-events: none;
+}
+
+.nav-link:hover {
+  color: #4E74A9;
+  background-color: rgba(110,140,180,0.08);
+}
+.dark .nav-link:hover {
+  color: #9DB7DF;
+  background-color: rgba(155,190,230,0.10);
+}
+
+.nav-link:hover:after { transform: scaleX(1); }
+
+.nav-link:focus-visible {
+  outline: 2px solid #4E74A9;
+  outline-offset: 3px;
+}
+.dark .nav-link:focus-visible { outline-color: #6B8FBD; }
+
 
 /* Keyframes for circle animations */
 @keyframes circle-1 {
@@ -342,4 +424,21 @@ body {
   66% {
     transform: translate(180px, -32px) translateZ(0);
   }
+}
+
+/* Completely hide scrollbars everywhere (while keeping scroll functionality) */
+/* Firefox */
+* {
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+}
+/* WebKit-based browsers (Chrome, Safari, new Edge, Opera) */
+*::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+}
+*::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
 }

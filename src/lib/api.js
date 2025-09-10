@@ -160,9 +160,12 @@ export const api = {
 
   // Elections
   createElection: (payload) => request(`/api/v1/user/election/create`, { method: "POST", body: payload }),
+  // Per docs: complete election update uses PATCH
+  updateElection: (payload) => request(`/api/v1/user/election/update`, { method: "PATCH", body: payload }),
   deleteElection: (payload) => request(`/api/v1/user/election/delete`, { method: "DELETE", body: payload }),
   findAllElections: () => request(`/api/v1/user/election/find-all`, { method: "GET" }),
   findElection: ({ electionId }) => request(`/api/v1/user/election/find?electionId=${encodeURIComponent(electionId)}`, { method: "GET" }),
+  // Results endpoint: GET with electionId as query param (no request body)
   electionResult: ({ electionId }) => request(`/api/v1/user/election/result?electionId=${encodeURIComponent(electionId)}`, { method: "GET" }),
 
   updateElectionName: (payload) => request(`/api/v1/user/election/update/name`, { method: "PATCH", body: payload }),
@@ -173,13 +176,21 @@ export const api = {
   updateElectionEnd: (payload) => request(`/api/v1/user/election/update/end-time`, { method: "PATCH", body: payload }),
   updateElectionVoters: (payload) => request(`/api/v1/user/election/update/voters`, { method: "PATCH", body: payload }),
   updateElectionOptions: (payload) => request(`/api/v1/user/election/update/options`, { method: "PATCH", body: payload }),
+  updateElectionIsOpen: (payload) => request(`/api/v1/user/election/update/is-open`, { method: "PATCH", body: payload }),
 
   // Public
   castVote: (payload) => request(`/api/v1/public/vote/cast`, { method: "PUT", body: payload, auth: false }),
   castMultiVote: (payload) => request(`/api/v1/public/vote/cast/multi`, { method: "PUT", body: payload, auth: false }),
+  // Open election (public)
+  findOpenElection: ({ electionId }) => request(`/api/v1/election/find/open?electionId=${encodeURIComponent(electionId)}`, { method: "GET", auth: false }),
+  castOpenVote: (payload) => request(`/api/v1/public/vote/open/cast`, { method: "PUT", body: payload, auth: false }),
+  castOpenMultiVote: (payload) => request(`/api/v1/public/vote/open/cast/multi`, { method: "PUT", body: payload, auth: false }),
+  // Public open election results
+  openElectionResult: ({ electionId }) => request(`/api/v1/election/open/result?electionId=${encodeURIComponent(electionId)}`, { method: "GET", auth: false }),
   health: () => request(`/api/v1/public/health-check`, { method: "GET" }),
+    // Per docs: voter-facing find endpoint is public under /api/v1/election/find/voter
     findElectionForVoter: ({ electionId, voterId }) =>
-      request(`/api/v1/user/election/find/voter?electionId=${encodeURIComponent(electionId)}&voterId=${encodeURIComponent(voterId)}`,
+      request(`/api/v1/election/find/voter?electionId=${encodeURIComponent(electionId)}&voterId=${encodeURIComponent(voterId)}`,
         { method: "GET", auth: false }),
 };
 

@@ -3,34 +3,32 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "../../../lib/api";
 import { Button } from "../../../components/ui/Button";
-import { Alert } from "../../../components/ui/Alert";
+import { useNotifications } from "../../../context/NotificationContext";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
   const [code, setCode] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [loading, setLoading] = useState(false);
 
   async function sendCode() {
-    setError(""); setMessage("");
     try {
       const res = await api.sendEmailVerification();
-      setMessage(res.message || "Code sent");
+      notifySuccess(res.message || "Code sent");
     } catch (e) {
-      setError(e?.data?.message || e.message);
+      notifyError(e?.data?.message || e.message || "Failed to send code");
     }
   }
 
   async function verify(e) {
     e.preventDefault();
-    setLoading(true); setError(""); setMessage("");
+    setLoading(true);
     try {
       const res = await api.verifyEmailCode({ verificationCode: code });
-      setMessage(res.message || "Verified");
+      notifySuccess(res.message || "Verified");
       router.replace("/dashboard");
     } catch (e) {
-      setError(e?.data?.message || e.message);
+      notifyError(e?.data?.message || e.message || "Verification failed");
     } finally { setLoading(false); }
   }
 
@@ -41,8 +39,7 @@ export default function VerifyEmailPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">Verify your email</h1>
           <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Enter the 6-digit code we sent to your email</p>
         </div>
-        {message && <Alert type="success" message={message} className="mb-4"/>}
-        {error && <Alert type="error" message={error} className="mb-4"/>}
+  {/* Notifications handled globally */}
         <div className="flex gap-2 mb-4">
           <Button onClick={sendCode}>Send code</Button>
         </div>

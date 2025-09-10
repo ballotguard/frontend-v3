@@ -23,7 +23,7 @@ function MoonIcon({ className = "w-5 h-5" }) {
 }
 
 export function NavBar() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, loading: authLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const isHome = pathname === "/";
@@ -46,21 +46,26 @@ export function NavBar() {
           Ballotguard
         </Link>
         <nav className="flex items-center gap-3 text-sm">
+          {/** Reusable nav link style */}
+          {/** Using a variable inside JSX for clarity */}
+          {(() => { /* no-op IIFE just to keep scope local */ })()}
           {/* Theme toggle button */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            className="p-2 rounded-md transition-colors relative overflow-hidden hover:bg-neutral-100/70 dark:hover:bg-neutral-800/70 hover:text-[#4E74A9] dark:hover:text-[#6B8FBD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E74A9]/50"
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
             {theme === 'light' ? <MoonIcon /> : <SunIcon />}
           </button>
           
-          {isAuthenticated ? (
+          {authLoading ? (
+            <div className="h-8 w-36 rounded-md bg-neutral-200 dark:bg-neutral-800 animate-pulse" aria-hidden />
+          ) : isAuthenticated ? (
             <>
-              <Link href="/dashboard" className="text-neutral-800 hover:text-neutral-900 dark:text-neutral-100 dark:hover:text-white">
+              <Link href="/dashboard" className="nav-link text-neutral-800 dark:text-neutral-100">
                 Dashboard
               </Link>
-              <Link href="/settings" className="text-neutral-800 hover:text-neutral-900 dark:text-neutral-100 dark:hover:text-white">
+              <Link href="/user/settings" className="nav-link text-neutral-800 dark:text-neutral-100">
                 Profile
               </Link>
               <div className="flex items-center gap-2">
@@ -78,11 +83,11 @@ export function NavBar() {
             </>
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/auth/login">
-                <Button variant="ghost">Login</Button>
+              <Link href="/auth/login" className="nav-link text-neutral-700 dark:text-neutral-200">
+                Login
               </Link>
-              <Link href="/auth/signup">
-                <Button>Sign Up</Button>
+              <Link href="/auth/signup" className="nav-link font-medium text-neutral-900 dark:text-white">
+                Sign Up
               </Link>
             </div>
           )}
