@@ -8,7 +8,7 @@ import { Button } from "../../../components/ui/Button";
 import { useNotifications } from "../../../context/NotificationContext";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, isAuthenticated, verifyAndRefreshSession } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +18,15 @@ export default function LoginPage() {
 
   async function onSubmit(e) {
     e.preventDefault();
+    // If already authenticated, verify and refresh session then redirect
+    if (isAuthenticated) {
+      const ok = await verifyAndRefreshSession();
+      if (ok) {
+        notifySuccess("Session active");
+        return router.replace("/dashboard");
+      }
+      // fallback to normal flow if refresh failed
+    }
     // no local error state
     setLoading(true);
     try {

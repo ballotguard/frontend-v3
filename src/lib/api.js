@@ -192,6 +192,8 @@ export const api = {
     findElectionForVoter: ({ electionId, voterId }) =>
       request(`/api/v1/election/find/voter?electionId=${encodeURIComponent(electionId)}&voterId=${encodeURIComponent(voterId)}`,
         { method: "GET", auth: false }),
+  // manual auth refresh (returns boolean success)
+  refreshAuth: () => queueRefreshJwt(),
 };
 
 export function setAuthSession({ jwt, refreshToken, userInfo }) {

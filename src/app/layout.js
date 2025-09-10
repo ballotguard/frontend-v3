@@ -1,4 +1,5 @@
 import { Poppins } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
@@ -31,7 +32,9 @@ export default function RootLayout({ children }) {
             <ThemeBackground>
               <div className="min-h-screen flex flex-col">
                 <NavBar />
-                <ClientRouteLoadingOverlay />
+                <Suspense fallback={null}>
+                  <ClientRouteLoadingOverlay />
+                </Suspense>
                 <main className="max-w-5xl mx-auto px-4 pt-24 pb-8 flex-1 w-full">{children}</main>
                 <Footer />
               </div>

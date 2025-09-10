@@ -31,6 +31,17 @@ export function AuthProvider({ children }) {
     user,
     isAuthenticated: !!user,
     loading,
+    async verifyAndRefreshSession() {
+      // Attempt a refresh if possible; then fetch user to validate session
+      try {
+        await api.refreshAuth?.();
+        const data = await api.getUser();
+        if (data?.userInfo) setUser(data.userInfo);
+        return !!data?.userInfo;
+      } catch {
+        return false;
+      }
+    },
     async login(email, password) {
       const data = await api.login({ email, password });
       setAuthSession(data);
