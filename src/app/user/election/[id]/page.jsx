@@ -5,7 +5,7 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
-import { Alert } from "@/components/ui/Alert";
+import { useNotifications } from "@/context/NotificationContext";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function ElectionManagePage() {
@@ -16,6 +16,7 @@ export default function ElectionManagePage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [loading, setLoading] = useState(true);
 
   const fetchElection = async () => {
@@ -38,6 +39,9 @@ export default function ElectionManagePage() {
     }
     fetchElection();
   }, [id, authLoading, isAuthenticated]);
+
+  useEffect(() => { if (error) notifyError(error); }, [error, notifyError]);
+  useEffect(() => { if (message) notifySuccess(message); }, [message, notifySuccess]);
 
   async function onDelete() {
     if (!confirm("Delete this election?")) return;
@@ -77,8 +81,7 @@ export default function ElectionManagePage() {
           </div>
         </div>
 
-        {message && <Alert type="success" message={message} className="mb-4" />}
-        {error && <Alert type="error" message={error} className="mb-4" />}
+  {/* Inline alerts removed in favor of global notifications */}
 
         {loading ? (
           <div className="flex items-center justify-center py-10">

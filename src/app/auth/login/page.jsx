@@ -18,23 +18,25 @@ export default function LoginPage() {
 
   async function onSubmit(e) {
     e.preventDefault();
-    // If already authenticated, verify and refresh session then redirect
+
     if (isAuthenticated) {
       const ok = await verifyAndRefreshSession();
       if (ok) {
         notifySuccess("Session active");
         return router.replace("/dashboard");
       }
-      // fallback to normal flow if refresh failed
     }
-    // no local error state
+
     setLoading(true);
     try {
       await login(email, password);
       notifySuccess("Logged in successfully");
       router.replace("/dashboard");
     } catch (err) {
-      notifyError(err?.data?.message || err.message || "Login failed");
+      // Make sure we're extracting the error message correctly
+      const errorMessage = err?.data?.message || err?.message || "Login failed";
+      console.error("Login error:", err); // For debugging
+      notifyError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -43,15 +45,15 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-[70vh] items-center justify-center">
       {/* glass card */}
-  <div className="w-full max-w-md rounded-2xl border border-neutral-200/70 dark:border-neutral-700/60 bg-white dark:bg-neutral-900/40 backdrop-blur-xl shadow-lg p-8">
+      <div className="w-full max-w-md rounded-2xl border border-neutral-200/70 dark:border-neutral-700/60 bg-white dark:bg-neutral-900/40 backdrop-blur-xl shadow-lg p-8">
         <div className="mb-6 text-center">
-      <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">
+          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">
             Welcome back
           </h1>
-      <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Sign in to continue to Ballotguard</p>
+          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Sign in to continue to Ballotguard</p>
         </div>
 
-  {/* Inline error removed; notifications now handled globally */}
+        {/* Inline error removed; notifications now handled globally */}
 
         <form onSubmit={onSubmit} className="space-y-4">
           <label className="flex flex-col gap-1">

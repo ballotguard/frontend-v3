@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Card } from "../components/ui/Card";
-import { Button } from "../components/ui/Button";
-import { ColorfulButton } from "../components/ui/ColorfulButton";
+import { HeroAuthButtons } from "../components/HeroAuthButtons";
 
 function BallotIcon({ className = "w-8 h-8" }) {
   return (
@@ -45,14 +44,7 @@ export default function Home() {
         <p className="mt-4 text-lg text-neutral-700 dark:text-neutral-300 max-w-2xl mx-auto">
           Create elections, invite voters, and view results with complete transparency and security.
         </p>
-        <div className="mt-8 flex justify-center gap-4">
-          <Link href="/auth/signup">
-            <ColorfulButton variant="secondary" width="160px">Get Started</ColorfulButton>
-          </Link>
-          <Link href="/auth/login">
-            <Button size="lg" className="bg-neutral-800 text-white hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-400 min-w-[140px]">Login</Button>
-          </Link>
-        </div>
+  <HeroAuthButtons variant="hero" />
       </div>
 
       {/* Informational Panes (full-width stacked) */}
@@ -251,9 +243,7 @@ export default function Home() {
           <p className="text-neutral-600 dark:text-neutral-300 mb-6">
             Join thousands of organizations using Ballotguard for secure, transparent voting.
           </p>
-          <Link href="/auth/signup">
-            <ColorfulButton variant="secondary" width="240px">Create Free Account</ColorfulButton>
-          </Link>
+          <HeroAuthButtons variant="cta" />
         </div>
       </div>
     </div>

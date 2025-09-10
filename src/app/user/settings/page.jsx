@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
-import { Alert } from "@/components/ui/Alert";
+import { useNotifications } from "@/context/NotificationContext";
 import { useAuth } from "@/context/AuthContext";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -14,6 +14,7 @@ export default function SettingsPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [loading, setLoading] = useState(true);
   const [passwords, setPasswords] = useState({ oldPassword: "", newPassword: "" });
 
@@ -47,12 +48,14 @@ export default function SettingsPage() {
     } catch (e) { setError(e?.data?.message || e.message); }
   }
 
+  useEffect(() => { if (error) notifyError(error); }, [error, notifyError]);
+  useEffect(() => { if (message) notifySuccess(message); }, [message, notifySuccess]);
+
   return (
     <AuthGuard>
       <div className="max-w-xl mx-auto min-h-[70vh] flex flex-col justify-center items-center space-y-6 text-black dark:text-white">
         <h1 className="text-2xl font-bold text-center">Settings</h1>
-        {message && <Alert type="success" message={message} />}
-        {error && <Alert type="error" message={error} />}
+  {/* Inline alerts removed; using notifications */}
         {loading ? (
           <div className="flex items-center justify-center py-10"><Spinner size={24} /><span className="sr-only">Loading</span></div>
         ) : settings ? (

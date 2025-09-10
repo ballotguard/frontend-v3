@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { AuthGuard } from "@/components/AuthGuard";
 import { api } from "@/lib/api";
-import { Alert } from "@/components/ui/Alert";
+import { useNotifications } from "@/context/NotificationContext";
 import { useAuth } from "@/context/AuthContext";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -12,6 +12,7 @@ export default function ElectionResultsPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const { notifyError } = useNotifications();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,6 +25,8 @@ export default function ElectionResultsPage() {
       finally { setLoading(false); }
     })();
   }, [id, authLoading, isAuthenticated]);
+
+  useEffect(() => { if (error) notifyError(error); }, [error, notifyError]);
 
   const totalVotes = result?.totalVotes || 0;
   const palette = useMemo(() => [
@@ -47,7 +50,7 @@ export default function ElectionResultsPage() {
   return (
     <AuthGuard>
   <div className="text-black dark:text-white">
-        {error && <Alert type="error" message={error} />}
+  {/* Inline error removed; using global notifications */}
         {loading ? (
           <div className="flex items-center justify-center py-10"><Spinner size={18} /><span className="sr-only">Loading</span></div>
         ) : (

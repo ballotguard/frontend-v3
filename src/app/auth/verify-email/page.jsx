@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "../../../lib/api";
 import { Button } from "../../../components/ui/Button";
@@ -10,13 +10,26 @@ export default function VerifyEmailPage() {
   const [code, setCode] = useState("");
   const { notifyError, notifySuccess } = useNotifications();
   const [loading, setLoading] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const hasSentRef = useRef(false);
+
+  // Automatically send verification email on page load (only once)
+  useEffect(() => {
+    if (!hasSentRef.current) {
+      hasSentRef.current = true;
+      sendCode();
+    }
+  }, []);
 
   async function sendCode() {
+    setSendingCode(true);
     try {
       const res = await api.sendEmailVerification();
       notifySuccess(res.message || "Code sent");
     } catch (e) {
       notifyError(e?.data?.message || e.message || "Failed to send code");
+    } finally {
+      setSendingCode(false);
     }
   }
 
@@ -37,12 +50,10 @@ export default function VerifyEmailPage() {
       <div className="w-full max-w-md rounded-2xl border border-neutral-200/70 dark:border-neutral-700/60 bg-white dark:bg-neutral-900/40 backdrop-blur-xl shadow-lg p-8">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">Verify your email</h1>
-          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Enter the 6-digit code we sent to your email</p>
+          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Enter the code we sent to your email</p>
         </div>
   {/* Notifications handled globally */}
-        <div className="flex gap-2 mb-4">
-          <Button onClick={sendCode}>Send code</Button>
-        </div>
+       
         <form onSubmit={verify} className="space-y-4">
           <label className="flex flex-col gap-1">
             <span className="text-sm text-neutral-700 dark:text-neutral-300">Verification code</span>
@@ -55,6 +66,15 @@ export default function VerifyEmailPage() {
               />
             </div>
           </label>
+           <div className="flex justify-left mb-4">
+          <button 
+            onClick={sendCode}
+            disabled={sendingCode}
+            className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {sendingCode ? "Sending..." : "Send email again?"}
+          </button>
+        </div>
           <Button type="submit" disabled={loading} className="w-full">{loading ? "Verifying..." : "Verify"}</Button>
         </form>
       </div>

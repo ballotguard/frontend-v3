@@ -1,12 +1,12 @@
 "use client";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Input } from "@/components/ui/Input";
 import { TextArea } from "@/components/ui/TextArea";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
-import { Alert } from "@/components/ui/Alert";
+import { useNotifications } from "@/context/NotificationContext";
 import { api } from "@/lib/api";
 
 // Tiny visual components
@@ -108,6 +108,7 @@ export default function NewElectionPage() {
   const [currentVoter, setCurrentVoter] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [step, setStep] = useState(0); // 0 basics, 1 schedule, 2 layout, 3 options, 4 voters, 5 review
   const startPickerRef = useRef(null);
   const endPickerRef = useRef(null);
@@ -275,6 +276,8 @@ export default function NewElectionPage() {
     { key: "review", title: "Review", subtitle: "Confirm and create" },
   ];
 
+  useEffect(() => { if (error) notifyError(error); }, [error, notifyError]);
+
   return (
     <AuthGuard>
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
@@ -287,7 +290,7 @@ export default function NewElectionPage() {
           <div key={step} className="animate-fade-in-up">
             <StepHeader title={`Create election · ${steps[step].title}`} subtitle={steps[step].subtitle} />
           </div>
-          {error && <Alert type="error" message={error} className="mb-3" />}
+          {/* Inline error alert removed; using global notifications */}
 
           {/* Step content */}
           <div key={"content-" + step} className="space-y-4 animate-fade-in-up">
@@ -319,7 +322,7 @@ export default function NewElectionPage() {
                         if (el?.showPicker) el.showPicker();
                         else el?.click();
                       }}
-                      className="shrink-0 text-neutral-700 dark:text-neutral-100 hover:opacity-90"
+                      className="shrink-0 text-neutral-800 dark:text-white hover:opacity-90 transition-colors"
                       aria-label="Open calendar"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -369,7 +372,7 @@ export default function NewElectionPage() {
                         if (el?.showPicker) el.showPicker();
                         else el?.click();
                       }}
-                      className="shrink-0 text-neutral-700 dark:text-neutral-100 hover:opacity-90"
+                      className="shrink-0 text-neutral-800 dark:text-white hover:opacity-90 transition-colors"
                       aria-label="Open calendar"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

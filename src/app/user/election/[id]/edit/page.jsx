@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Input } from "@/components/ui/Input";
 import { TextArea } from "@/components/ui/TextArea";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
-import { Alert } from "@/components/ui/Alert";
+import { useNotifications } from "@/context/NotificationContext";
 import { api } from "@/lib/api";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -19,21 +19,10 @@ export default function EditElectionPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [messages, setMessages] = useState([]);
-  // Lock states: within 15 minutes before start, running, or ended
-  const lockInfo = useMemo(() => {
-    const now = Date.now();
-    const start = orig?.startTime ? new Date(orig.startTime).getTime() : null;
-    const end = orig?.endTime ? new Date(orig.endTime).getTime() : null;
-    const fifteen = 15 * 60 * 1000;
-    const within15 = !!start && now < start && (start - now) <= fifteen;
-    const running = !!start && now >= start && (!end || now <= end);
-    const ended = !!end && now > end;
-    let reason = null;
-    if (ended) reason = "ended";
-    else if (running) reason = "running";
-    else if (within15) reason = "prelock";
-    return { within15, running, ended, reason, locked: !!reason };
-  }, [orig]);
+  const { notifyError, notifySuccess } = useNotifications();
+  const [isLocked, setIsLocked] = useState(false);
+  const [currentOption, setCurrentOption] = useState("");
+  const [currentVoter, setCurrentVoter] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -60,6 +49,26 @@ export default function EditElectionPage() {
     })();
   }, [id]);
 
+  // Check if election is within 15 minutes of start time
+  useEffect(() => {
+    if (!form?.startTime) return;
+    
+    const checkLockStatus = () => {
+      const now = new Date();
+      const startTime = new Date(form.startTime);
+      const timeDiff = startTime.getTime() - now.getTime();
+      const minutesDiff = timeDiff / (1000 * 60);
+      
+      // Lock if we are within 15 minutes of the start time
+      setIsLocked(minutesDiff <= 15 && minutesDiff > 0);
+    };
+    
+    checkLockStatus();
+    const interval = setInterval(checkLockStatus, 30000); // Check every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [form?.startTime]);
+
   function updateField(k, v) { setForm((s) => ({ ...s, [k]: v })); }
   function updateLayout(k, v) { setForm((s) => ({ ...s, electionLayout: { ...s.electionLayout, [k]: v } })); }
   function updateArray(field, idx, k, v) {
@@ -67,6 +76,16 @@ export default function EditElectionPage() {
   }
   function addItem(field) { setForm((s) => ({ ...s, [field]: [...s[field], field === "options" ? { optionName: "" } : { voterEmail: "" }] })); }
   function removeItem(field, idx) { setForm((s) => ({ ...s, [field]: s[field].filter((_, i) => i !== idx) })); }
+  function addOption() {
+    if (!currentOption.trim()) return;
+    setForm(s => ({ ...s, options: [...s.options, { optionName: currentOption.trim() }] }));
+    setCurrentOption("");
+  }
+  function addVoter() {
+    if (!currentVoter.trim()) return;
+    setForm(s => ({ ...s, voters: [...s.voters, { voterEmail: currentVoter.trim() }] }));
+    setCurrentVoter("");
+  }
 
   async function onSave() {
     if (!form) return;
@@ -86,11 +105,26 @@ export default function EditElectionPage() {
         options: form.options.map(o => ({ optionName: o.optionName, optionId: o.optionId })).filter(o => o.optionName && o.optionName.trim().length > 0),
         voters: form.isOpen ? [] : form.voters,
       };
-  const res = await api.updateElection(payload);
+      const res = await api.updateElection(payload);
       setMessages([{ type: "success", text: res?.message || "All changes saved" }]);
+      // Redirect to overview after successful save
+      setTimeout(() => {
+        router.push(`/user/election/${id}`);
+      }, 1000);
     } catch (e) { setError(e?.data?.message || e.message); }
     finally { setSaving(false); }
   }
+
+  // Emit notifications for errors and success messages
+  useEffect(() => {
+    if (error) notifyError(error);
+  }, [error, notifyError]);
+  useEffect(() => {
+    messages.forEach(m => {
+      if (m.type === 'success') notifySuccess(m.text);
+      else notifyError(m.text);
+    });
+  }, [messages, notifyError, notifySuccess]);
 
   if (loading) return <div className="flex items-center justify-center py-10"><Spinner size={18} /><span className="sr-only">Loading</span></div>;
   if (!form) return <div>Not found</div>;
@@ -109,53 +143,40 @@ export default function EditElectionPage() {
                   <Button variant="secondary" onClick={() => router.push(`/user/election/${id}`)}>Cancel</Button>
                   <Button
                     onClick={onSave}
-                    disabled={saving || lockInfo.locked}
-                    title={
-                      lockInfo.reason === "prelock"
-                        ? "Editing locked within 15 minutes of start"
-                        : lockInfo.reason === "running"
-                        ? "Election is running"
-                        : lockInfo.reason === "ended"
-                        ? "Election has ended"
-                        : undefined
-                    }
+                    disabled={saving || isLocked}
+                    title={isLocked ? "Editing locked within 15 minutes of start time" : undefined}
                   >
                     {saving ? "Saving..." : "Save"}
                   </Button>
                 </div>
               </div>
 
-              {lockInfo.reason === "prelock" && (
-                <Alert type="warning" message="Editing is locked within 15 minutes of the election start." />
+              {/* Show lock message at the top */}
+              {isLocked && (
+                <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-3 rounded-md">
+                  Election is uneditable 15 minutes before the start time.
+                </div>
               )}
-              {lockInfo.reason === "running" && (
-                <Alert type="error" message="Election is already running. You cannot edit it." />
-              )}
-              {lockInfo.reason === "ended" && (
-                <Alert type="error" message="Election has ended. You cannot edit it." />
-              )}
-              {error && <Alert type="error" message={error} />}
-              {messages.map((m, i) => <Alert key={i} type={m.type} message={m.text} />)}
 
               <div className="space-y-4">
-                <Input label="Name" value={form.electionName} onChange={(e) => updateField("electionName", e.target.value)} disabled={lockInfo.locked} />
-                <TextArea label="Description" value={form.electionDescription} onChange={(e) => updateField("electionDescription", e.target.value)} disabled={lockInfo.locked} />
+                <Input label="Name" value={form.electionName} onChange={(e) => updateField("electionName", e.target.value)} disabled={isLocked} />
+                <TextArea label="Description" value={form.electionDescription} onChange={(e) => updateField("electionDescription", e.target.value)} disabled={isLocked} />
 
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <Input label="Start time" type="datetime-local" value={form.startTime} onChange={(e) => updateField("startTime", e.target.value)} disabled={lockInfo.locked} />
-                  <Input label="End time" type="datetime-local" value={form.endTime} onChange={(e) => updateField("endTime", e.target.value)} disabled={lockInfo.locked} />
+                  <Input label="Start time" type="datetime-local" value={form.startTime} onChange={(e) => updateField("startTime", e.target.value)} disabled={isLocked} />
+                  <Input label="End time" type="datetime-local" value={form.endTime} onChange={(e) => updateField("endTime", e.target.value)} disabled={isLocked} />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <Select label="Poll type" value={form.electionLayout.pollType} onChange={(e) => updateLayout("pollType", e.target.value)} disabled={lockInfo.locked}>
+                  <Select label="Poll type" value={form.electionLayout.pollType} onChange={(e) => updateLayout("pollType", e.target.value)} disabled={isLocked}>
                     <option value="radio">Single choice</option>
                     <option value="checkbox">Multiple choice</option>
                   </Select>
-                  <Input label="Card ID" value={form.electionLayout.electionCardId} onChange={(e) => updateLayout("electionCardId", e.target.value)} disabled={lockInfo.locked} />
+                  <Input label="Card ID" value={form.electionLayout.electionCardId} onChange={(e) => updateLayout("electionCardId", e.target.value)} disabled={isLocked} />
                 </div>
 
                 <label className="inline-flex items-center gap-3 cursor-pointer select-none">
-                  <input type="checkbox" className="sr-only" checked={!!form.isOpen} onChange={(e) => updateField("isOpen", e.target.checked)} disabled={lockInfo.locked} />
+                  <input type="checkbox" className="sr-only" checked={!!form.isOpen} onChange={(e) => updateField("isOpen", e.target.checked)} disabled={isLocked} />
                   <span className={`relative inline-flex h-6 w-11 items-center rounded-full border-[0.5px] border-black/40 dark:border-white/50 backdrop-blur transition-all duration-200 ease-in-out ${form.isOpen ? 'bg-emerald-600 border-emerald-600' : 'bg-white/60 dark:bg-neutral-900/50'}`}>
                     <span className={`inline-block h-5 w-5 rounded-full shadow-sm transition-all duration-200 ease-in-out ${form.isOpen ? 'translate-x-5 bg-white' : 'translate-x-0.5 bg-black'}`} />
                   </span>
@@ -163,31 +184,46 @@ export default function EditElectionPage() {
                 </label>
 
                 <div>
-                  <h2 className="font-medium mb-2">Options</h2>
-                  {form.options.map((o, idx) => (
-                    <div key={idx} className="flex gap-2 mb-2">
-                      <div className="inline-flex items-center justify-center w-8 shrink-0">
-                        <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full bg-neutral-200/80 dark:bg-neutral-800/80 text-neutral-800 dark:text-neutral-200">{idx+1}</span>
-                      </div>
-                      <Input className="flex-1" value={o.optionName} onChange={(e) => updateArray("options", idx, "optionName", e.target.value)} placeholder={`Option ${idx + 1}`} disabled={lockInfo.locked} />
-                      <Button type="button" variant="secondary" onClick={() => removeItem("options", idx)} disabled={lockInfo.locked}>Remove</Button>
+                  <div className="mb-2">
+                    <h2 className="font-medium">Options</h2>
+                  </div>
+                  <div className="flex gap-2 mb-4">
+                    <Input className="flex-1" value={currentOption} onChange={(e) => setCurrentOption(e.target.value)} placeholder="Enter options" disabled={isLocked} onKeyPress={(e) => e.key === 'Enter' && addOption()} />
+                    <Button type="button" onClick={addOption} disabled={isLocked || !currentOption.trim()}>Add option</Button>
+                  </div>
+                  {form.options.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Added options:</h3>
+                      {form.options.map((o, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 rounded-md bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700">
+                          <span className="text-sm">{idx + 1}. {o.optionName}</span>
+                          <Button type="button" variant="secondary" size="sm" onClick={() => removeItem("options", idx)} disabled={isLocked}>Remove</Button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                  <Button type="button" variant="ghost" onClick={() => addItem("options")} disabled={lockInfo.locked}>Add option</Button>
+                  )}
                 </div>
 
                 <div>
-                  <h2 className="font-medium mb-2">Voters</h2>
-                  {form.voters.map((v, idx) => (
-                    <div key={idx} className="flex gap-2 mb-2">
-                      <div className="inline-flex items-center justify-center w-8 shrink-0">
-                        <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full bg-neutral-200/80 dark:bg-neutral-800/80 text-neutral-800 dark:text-neutral-200">{idx+1}</span>
-                      </div>
-                      <Input className="flex-1" type="email" value={v.voterEmail} onChange={(e) => updateArray("voters", idx, "voterEmail", e.target.value)} placeholder={`voter${idx + 1}@email.com`} disabled={lockInfo.locked || !!form.isOpen} />
-                      <Button type="button" variant="secondary" onClick={() => removeItem("voters", idx)} disabled={lockInfo.locked || !!form.isOpen}>Remove</Button>
+                  <div className="mb-2">
+                    <h2 className="font-medium">Voters</h2>
+                  </div>
+                  {form.isOpen && <div className="text-xs opacity-70 mb-3">Voter list is disabled while election is open.</div>}
+                  <div className="flex gap-2 mb-4">
+                    <Input className="flex-1" type="email" value={currentVoter} onChange={(e) => setCurrentVoter(e.target.value)} placeholder="Enter email address" disabled={isLocked || form.isOpen} onKeyPress={(e) => e.key === 'Enter' && addVoter()} />
+                    <Button type="button" onClick={addVoter} disabled={isLocked || form.isOpen || !currentVoter.trim() || !/@/.test(currentVoter.trim())}>Add voter</Button>
+                  </div>
+                  {!form.isOpen && form.voters.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Added voters:</h3>
+                      {form.voters.map((v, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 rounded-md bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700">
+                          <span className="text-sm">{idx + 1}. {v.voterEmail}</span>
+                          <Button type="button" variant="secondary" size="sm" onClick={() => removeItem("voters", idx)} disabled={isLocked}>Remove</Button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                  <Button type="button" variant="ghost" onClick={() => addItem("voters")} disabled={lockInfo.locked || !!form.isOpen}>Add voter</Button>
+                  )}
                 </div>
               </div>
           </div>

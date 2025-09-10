@@ -5,7 +5,7 @@ import { api } from "../../lib/api";
 import { AuthGuard } from "../../components/AuthGuard";
 import { Button } from "../../components/ui/Button";
 import { ColorfulButton } from "../../components/ui/ColorfulButton";
-import { Alert } from "../../components/ui/Alert";
+import { useNotifications } from "../../context/NotificationContext";
 import { useAuth } from "../../context/AuthContext";
 import { Spinner } from "../../components/ui/Spinner";
 // no local cache; always fetch from API per requirement
@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [elections, setElections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { notifyError } = useNotifications();
   const [activeTab, setActiveTab] = useState("running"); // running | upcoming | finished
   const [startDateFilter, setStartDateFilter] = useState(""); // YYYY-MM-DD
   const [endDateFilter, setEndDateFilter] = useState("");   // YYYY-MM-DD
@@ -42,6 +43,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!authLoading && isAuthenticated) load();
   }, [authLoading, isAuthenticated]);
+  useEffect(() => { if (error) notifyError(error); }, [error, notifyError]);
 
   const categorized = useMemo(() => {
     const now = Date.now();
@@ -165,23 +167,30 @@ export default function DashboardPage() {
               <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">Filters</h2>
             </div>
             <div className="flex flex-col gap-2">
-              {[
-                { key: "upcoming", label: `Upcoming (${categorized.upcoming.length})` },
-                { key: "running", label: `Running (${categorized.running.length})` },
-                { key: "finished", label: `Finished (${categorized.finished.length})` },
-              ].map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setActiveTab(t.key)}
-                  className={`w-full text-left px-3 py-2 rounded-md border transition ${
-                    activeTab === t.key
-                      ? "border-neutral-900 text-neutral-900 dark:border-white dark:text-white"
-                      : "border-neutral-300/70 dark:border-neutral-700/60 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
+              {["upcoming","running","finished"].map((key) => {
+                const label = key.charAt(0).toUpperCase() + key.slice(1) + ` (${categorized[key].length})`;
+                let base = "w-full text-left px-3 py-2 rounded-md border transition";
+                let selected = activeTab === key;
+                let darkText = "dark:text-neutral-300";
+                let style = {};
+                if (key === "upcoming") {
+                  darkText = "dark:text-white";
+                  style = { color: "white" };
+                }
+                let className = selected
+                  ? `border-neutral-900 text-neutral-900 dark:border-white ${darkText}`
+                  : `border-neutral-300/70 dark:border-neutral-700/60 text-neutral-700 ${darkText} hover:bg-neutral-50 dark:hover:bg-neutral-800/40`;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActiveTab(key)}
+                    className={`${base} ${className}`}
+                    style={style}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
             {/* Date filters */}
             <div className="mt-6 space-y-3">
@@ -268,7 +277,7 @@ export default function DashboardPage() {
         {/* Content */}
         <section className="flex-1">
           <div className="mb-4 flex items-center justify-between">
-            <h1 className="text-xl font-semibold capitalize">{activeTab} elections</h1>
+            <h1 className="text-xl font-semibold capitalize text-neutral-900 dark:text-white">{activeTab} elections</h1>
             <div className="flex gap-3">
               <Button variant="secondary" onClick={load} className="bg-neutral-800 text-white hover:bg-neutral-900 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-neutral-100 w-36 h-[47px] mt-[1px]">Refresh</Button>
               <Link href="/user/election/new">
@@ -276,7 +285,7 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
-          {error && <Alert type="error" message={error} />}
+          {/* Inline error removed; using global notifications */}
           {loading ? (
             <div className="flex items-center justify-center py-10"><Spinner size={18} /><span className="sr-only">Loading</span></div>
           ) : filtered.length ? (

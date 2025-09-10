@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "../../../lib/api";
 import { Button } from "../../../components/ui/Button";
 import { useNotifications } from "../../../context/NotificationContext";
@@ -9,6 +10,7 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const { notifyError, notifySuccess } = useNotifications();
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -16,6 +18,8 @@ export default function ForgotPasswordPage() {
     try {
       const res = await api.sendResetCode({ email });
       notifySuccess(res.message || "Code sent");
+      // Redirect to reset password page with email parameter
+      router.push(`/auth/reset?email=${encodeURIComponent(email)}`);
     } catch (e) {
       notifyError(e?.data?.message || e.message || "Failed to send code");
     } finally { setLoading(false); }

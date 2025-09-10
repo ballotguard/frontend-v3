@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
-import { Alert } from "@/components/ui/Alert";
+import { useNotifications } from "@/context/NotificationContext";
 
 export default function PublicVotePage() {
   const params = useParams();
@@ -17,6 +17,7 @@ export default function PublicVotePage() {
   const [loading, setLoading] = useState(true);
   const [election, setElection] = useState(null);
   const [error, setError] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [resultMessage, setResultMessage] = useState("");
@@ -111,6 +112,9 @@ export default function PublicVotePage() {
     } finally { setSubmitting(false); }
   }
 
+  useEffect(() => { if (error) notifyError(error); }, [error, notifyError]);
+  useEffect(() => { if (resultMessage) notifySuccess(resultMessage); }, [resultMessage, notifySuccess]);
+
   function OptionItem({ option, checked, onChange }) {
     const isCheckbox = pollType === "checkbox";
     return (
@@ -131,7 +135,7 @@ export default function PublicVotePage() {
   return (
     <div className="max-w-3xl mx-auto p-4 text-black dark:text-white font-[Poppins,ui-sans-serif,system-ui]">
       {loading && <div className="text-sm opacity-80">Loading election…</div>}
-      {!loading && error && <Alert type="error" message={error} />}
+  {/* Inline error removed; using notifications */}
 
       {!loading && !error && election && (
         <div className="space-y-4">
@@ -225,7 +229,7 @@ export default function PublicVotePage() {
               </div>
             </div>
           )}
-          {error && !loading && <Alert type="error" message={error} />}
+          {/* Inline error removed; using notifications */}
         </div>
       )}
     </div>

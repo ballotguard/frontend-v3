@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
-import { Alert } from "@/components/ui/Alert";
+import { useNotifications } from "@/context/NotificationContext";
 
 export default function OpenVotePage() {
   const params = useParams();
@@ -12,6 +12,7 @@ export default function OpenVotePage() {
   const [loading, setLoading] = useState(true);
   const [election, setElection] = useState(null);
   const [error, setError] = useState("");
+  const { notifyError, notifySuccess } = useNotifications();
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [selectedOptionIds, setSelectedOptionIds] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -106,6 +107,9 @@ export default function OpenVotePage() {
     } finally { setSubmitting(false); }
   }
 
+  useEffect(() => { if (error) notifyError(error); }, [error, notifyError]);
+  useEffect(() => { if (resultMessage) notifySuccess(resultMessage); }, [resultMessage, notifySuccess]);
+
   useEffect(() => {
     if (!electionId || !endedNow) return;
     (async () => {
@@ -146,7 +150,7 @@ export default function OpenVotePage() {
   return (
     <div className="max-w-3xl mx-auto p-4 text-black dark:text-white font-[Poppins,ui-sans-serif,system-ui]">
       {loading && <div className="text-sm opacity-80">Loading election…</div>}
-      {!loading && error && <Alert type="error" message={error} />}
+  {/* Inline error removed; using notifications */}
 
       {!loading && !error && election && (
         <div className="space-y-4">
@@ -244,7 +248,7 @@ export default function OpenVotePage() {
             </div>
           )}
 
-          {error && !loading && <Alert type="error" message={error} />}
+          {/* Inline error removed; using notifications */}
           {endedNow && openResult && (
             <div className="rounded-2xl border-[0.5px] border-black dark:border-white bg-white/50 dark:bg-neutral-900/30 backdrop-blur-2xl p-4 sm:p-5 relative overflow-hidden">
               <div className="pointer-events-none absolute -top-8 -left-6 h-24 w-24 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 blur-2xl rounded-full" />
