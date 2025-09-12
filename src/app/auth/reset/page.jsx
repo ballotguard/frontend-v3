@@ -1,11 +1,19 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "../../../lib/api";
 import { Button } from "../../../components/ui/Button";
 import { useNotifications } from "../../../context/NotificationContext";
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[70vh] items-center justify-center text-sm text-neutral-500 dark:text-neutral-400">Loading...</div>}>
+      <ResetPasswordInner />
+    </Suspense>
+  );
+}
+
+function ResetPasswordInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
