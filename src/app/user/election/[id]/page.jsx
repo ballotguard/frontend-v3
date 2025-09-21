@@ -125,11 +125,11 @@ export default function ElectionManagePage() {
                     <span className="opacity-70 mr-1">Open voting link:</span>
                     <a
                       className="underline decoration-dotted underline-offset-2 break-all"
-                      href={`${process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000"}/election/open/${id}`}
+                      href={`${data.openElectionLink || "https://ballotguard.vercel.app"}/election/open/${id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {(process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000") + "/election/open/" + id}
+                      {(data.openElectionLink || "https://ballotguard.vercel.app") + "/election/open/" + id}
                     </a>
                   </div>
                 )}

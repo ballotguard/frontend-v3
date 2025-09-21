@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8089";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 import { storage, TOKEN_KEYS } from "./storage";
 
@@ -157,6 +157,7 @@ export const api = {
 
   getUserSettings: () => request(`/api/v1/user/settings`, { method: "GET" }),
   updateUserSettings: (payload) => request(`/api/v1/user/settings`, { method: "PUT", body: payload }),
+  updateUserTheme: (payload) => request(`/api/v1/user/settings/theme`, { method: "PUT", body: payload }),
 
   // Elections
   createElection: (payload) => request(`/api/v1/user/election/create`, { method: "POST", body: payload }),

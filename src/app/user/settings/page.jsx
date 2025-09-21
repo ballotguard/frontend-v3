@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/AuthGuard";
 import { api } from "@/lib/api";
+import { storage, TOKEN_KEYS } from "@/lib/storage";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
@@ -11,12 +12,13 @@ import { Spinner } from "@/components/ui/Spinner";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState(null);
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const { notifyError, notifySuccess } = useNotifications();
   const [loading, setLoading] = useState(true);
   const [passwords, setPasswords] = useState({ oldPassword: "", newPassword: "" });
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     if (authLoading || !isAuthenticated) return;
@@ -24,17 +26,38 @@ export default function SettingsPage() {
       try {
         const res = await api.getUserSettings();
         setSettings(res?.userSettings || null);
+        
+        // Get user name from current user context or localStorage
+        let name = user?.name || "";
+        if (!name && user?.firstName && user?.lastName) {
+          name = `${user.firstName} ${user.lastName}`;
+        }
+        if (!name) {
+          const userData = storage.get(TOKEN_KEYS.user);
+          name = userData?.name || "";
+          if (!name && userData?.firstName && userData?.lastName) {
+            name = `${userData.firstName} ${userData.lastName}`;
+          }
+        }
+        setUserName(name);
       } catch (e) {
         setError(e?.data?.message || e.message);
       } finally { setLoading(false); }
     })();
-  }, [authLoading, isAuthenticated]);
+  }, [authLoading, isAuthenticated, user]);
 
   async function saveSettings() {
     setError(""); setMessage("");
     try {
-      const res = await api.updateUserSettings(settings);
-      setSettings(res?.userSettings || settings);
+      // Detect current theme from the document
+      const isDark = document.documentElement.classList.contains('dark');
+      const currentTheme = isDark ? 'Dark' : 'Light';
+      
+      // Include current theme in the settings payload
+      const settingsWithTheme = { ...settings, preferredTheme: currentTheme };
+      
+      const res = await api.updateUserSettings(settingsWithTheme);
+      setSettings(res?.userSettings || settingsWithTheme);
       setMessage(res.message || "Settings saved");
     } catch (e) { setError(e?.data?.message || e.message); }
   }
@@ -54,24 +77,24 @@ export default function SettingsPage() {
   return (
     <AuthGuard>
       <div className="max-w-xl mx-auto min-h-[70vh] flex flex-col justify-center items-center space-y-6 text-black dark:text-white">
-        <h1 className="text-2xl font-bold text-center">Settings</h1>
+        <h1 className="text-2xl font-bold text-center">Profile</h1>
   {/* Inline alerts removed; using notifications */}
         {loading ? (
           <div className="flex items-center justify-center py-10"><Spinner size={24} /><span className="sr-only">Loading</span></div>
         ) : settings ? (
           <>
             <section className="space-y-4 w-full flex flex-col items-center">
-              <Input label="Email" value={settings.userEmail || ""} onChange={(e) => setSettings({ ...settings, userEmail: e.target.value })} className="w-full max-w-md" />
+              <div className="w-full max-w-md">
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <div className="text-base text-gray-700 dark:text-gray-300">{userName || "No name set"}</div>
+              </div>
+              <div className="w-full max-w-md">
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <div className="text-base text-gray-700 dark:text-gray-300">{settings.userEmail || "No email set"}</div>
+              </div>
               <label className="w-full max-w-md text-sm font-medium mb-1">Language
                 <select className="mt-1 block w-full rounded-lg border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-900/60 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500" value={settings.preferredLanguage || "English"} onChange={(e) => setSettings({ ...settings, preferredLanguage: e.target.value })}>
                   <option>English</option>
-                  <option>Spanish</option>
-                </select>
-              </label>
-              <label className="w-full max-w-md text-sm font-medium mb-1">Theme
-                <select className="mt-1 block w-full rounded-lg border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-900/60 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500" value={settings.preferredTheme || "Light"} onChange={(e) => setSettings({ ...settings, preferredTheme: e.target.value })}>
-                  <option>Light</option>
-                  <option>Dark</option>
                 </select>
               </label>
               <label className="flex items-center gap-3 text-base font-medium select-none w-full max-w-md">

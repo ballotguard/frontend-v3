@@ -62,10 +62,10 @@ export function ThemeProvider({ children }) {
       setTheme(next);
       // Persist locally immediately
       try { localStorage.setItem("theme", next); } catch {}
-      // If authenticated, update user settings
+      // If authenticated, update user theme using dedicated endpoint
       if (isAuthenticated) {
         try {
-          await api.updateUserSettings({ preferredTheme: next === "dark" ? "Dark" : "Light" });
+          await api.updateUserTheme({ preferredTheme: next === "dark" ? "Dark" : "Light" });
         } catch {
           // ignore API errors for theme persistence
         }

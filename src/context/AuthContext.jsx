@@ -16,7 +16,17 @@ export function AuthProvider({ children }) {
         if (token) {
           initializeAuthScheduling();
           const data = await api.getUser();
-          if (data?.userInfo) setUser(data.userInfo);
+          if (data?.userInfo) {
+            setUser(data.userInfo);
+            // Save user data to localStorage from API response
+            const userData = {
+              name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
+              firstName: data.userInfo.firstName,
+              lastName: data.userInfo.lastName,
+              email: data.userInfo.email
+            };
+            storage.set(TOKEN_KEYS.user, userData);
+          }
         }
       } catch {
         // ignore
@@ -36,7 +46,17 @@ export function AuthProvider({ children }) {
       try {
         await api.refreshAuth?.();
         const data = await api.getUser();
-        if (data?.userInfo) setUser(data.userInfo);
+        if (data?.userInfo) {
+          setUser(data.userInfo);
+          // Save user data to localStorage from API response
+          const userData = {
+            name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
+            firstName: data.userInfo.firstName,
+            lastName: data.userInfo.lastName,
+            email: data.userInfo.email
+          };
+          storage.set(TOKEN_KEYS.user, userData);
+        }
         return !!data?.userInfo;
       } catch {
         return false;
@@ -46,22 +66,54 @@ export function AuthProvider({ children }) {
       const data = await api.login({ email, password });
       setAuthSession(data);
       setUser(data.userInfo);
+      // Save user data to localStorage from API response
+      if (data.userInfo) {
+        const userData = {
+          name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
+          firstName: data.userInfo.firstName,
+          lastName: data.userInfo.lastName,
+          email: data.userInfo.email
+        };
+        storage.set(TOKEN_KEYS.user, userData);
+      }
       return data;
     },
     async signup(payload) {
       const data = await api.signup(payload);
       setAuthSession(data);
       setUser(data.userInfo);
+      // Save user data to localStorage from API response
+      if (data.userInfo) {
+        const userData = {
+          name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
+          firstName: data.userInfo.firstName,
+          lastName: data.userInfo.lastName,
+          email: data.userInfo.email
+        };
+        storage.set(TOKEN_KEYS.user, userData);
+      }
       return data;
     },
     async refreshUser() {
       const data = await api.getUser();
-      if (data?.userInfo) setUser(data.userInfo);
+      if (data?.userInfo) {
+        setUser(data.userInfo);
+        // Save user data to localStorage from API response
+        const userData = {
+          name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
+          firstName: data.userInfo.firstName,
+          lastName: data.userInfo.lastName,
+          email: data.userInfo.email
+        };
+        storage.set(TOKEN_KEYS.user, userData);
+      }
       return data;
     },
     logout() {
       clearAuthSession();
       setUser(null);
+      // Clear user data from localStorage
+      storage.remove(TOKEN_KEYS.user);
     },
   }), [user, loading]);
 

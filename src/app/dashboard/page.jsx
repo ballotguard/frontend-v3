@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { api } from "../../lib/api";
 import { AuthGuard } from "../../components/AuthGuard";
@@ -175,17 +175,23 @@ export default function DashboardPage() {
                 let style = {};
                 if (key === "upcoming") {
                   darkText = "dark:text-white";
-                  style = { color: "white" };
+                  style = {};
                 }
                 let className = selected
-                  ? `border-neutral-900 text-neutral-900 dark:border-white ${darkText}`
-                  : `border-neutral-300/70 dark:border-neutral-700/60 text-neutral-700 ${darkText} hover:bg-neutral-50 dark:hover:bg-neutral-800/40`;
+                  ? `border-neutral-900 dark:border-white ${darkText} ${key === "upcoming" ? "text-[#222] dark:text-white" : "text-neutral-900"}`
+                  : `border-neutral-300/70 dark:border-neutral-700/60 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 ${darkText} ${key === "upcoming" ? "text-[#222] dark:text-white" : "text-neutral-700"}`;
+
+                // Ensure Upcoming tab color is correct in both themes
+                if (key === "upcoming") {
+                  className = selected
+                    ? `border-neutral-900 dark:border-white text-black dark:text-white`
+                    : `border-neutral-300/70 dark:border-neutral-700/60 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 text-black dark:text-white`;
+                }
                 return (
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`${base} ${className}`}
-                    style={style}
+                    className={`${base} ${className}${key === "upcoming" ? "" : ""} ${key === "upcoming" ? "text-black dark:text-white" : ""}`}
                   >
                     {label}
                   </button>
@@ -289,63 +295,113 @@ export default function DashboardPage() {
           {loading ? (
             <div className="flex items-center justify-center py-10"><Spinner size={18} /><span className="sr-only">Loading</span></div>
           ) : filtered.length ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map((e) => (
-                <div key={e.electionId} className="group relative">
-                  {/* solid border: black (light) / white (dark) */}
-                  <div className="rounded-xl">
-                    <div className="relative rounded-xl border-[1px] border-neutral-200/70 dark:border-neutral-700/30 p-4 bg-white dark:bg-neutral-900/60 text-neutral-900 dark:text-white backdrop-blur-sm transition shadow-sm hover:shadow-md">
-                      {/* content that blurs/dims on hover */}
-                      <div className="transition duration-200 group-hover:blur-sm group-hover:opacity-70">
-                        <div className="min-w-0 h-32 flex flex-col">
-                          <div className="font-medium text-base truncate">{e.electionName || "Untitled"}</div>
-                          <div className="mt-2 text-xs text-neutral-600 dark:text-neutral-400 line-clamp-3 flex-1">
-                            {e.electionDescription || e.description || "No description available"}
-                          </div>
-                          <div className="mt-4 w-full">
-                            <div className="rounded-md border-[0.5px] border-neutral-300 dark:border-neutral-700 bg-white/60 dark:bg-white/5 px-2 py-1.5 text-[10px] text-neutral-700 dark:text-neutral-200 w-full">
-                              <div className="flex items-center justify-between">
-                                <div className="flex-1 text-center">
-                                  <div className="font-medium">{fmt(e.startTime)}</div>
-                                  <div className="text-xs opacity-75">{fmtWithTime(e.startTime).split(' - ')[1]}</div>
-                                </div>
-                                <div className="h-px w-8 bg-neutral-400 dark:bg-neutral-500 my-2"></div>
-                                <div className="flex-1 text-center">
-                                  <div className="font-medium">{fmt(e.endTime)}</div>
-                                  <div className="text-xs opacity-75">{fmtWithTime(e.endTime).split(' - ')[1]}</div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {/* hover actions centered */}
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="flex gap-2 pointer-events-auto">
-                          {activeTab === "finished" ? (
-                            <Link href={`/user/election/${e.electionId}/results`}>
-                              <Button size="sm" variant="secondary">Results</Button>
-                            </Link>
-                          ) : (
-                            <Link href={`/user/election/${e.electionId}/edit`}>
-                              <Button size="sm" variant="secondary" disabled={isEditLocked(e.startTime)} title={isEditLocked(e.startTime) ? "Editing locked within 15 minutes of start" : "Edit"}>Edit</Button>
-                            </Link>
-                          )}
-                          <Link href={`/user/election/${e.electionId}`}>
-                            <Button size="sm">View</Button>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ScrollableCards elections={filtered} activeTab={activeTab} fmt={fmt} fmtWithTime={fmtWithTime} isEditLocked={isEditLocked} />
           ) : (
             <div className="text-sm text-neutral-600 dark:text-neutral-400">No elections in this category.</div>
           )}
         </section>
       </div>
     </AuthGuard>
+  );
+}
+
+function ScrollableCards({ elections, activeTab, fmt, fmtWithTime, isEditLocked }) {
+  const ref = useRef(null);
+  const [atTop, setAtTop] = useState(true);
+  const [atBottom, setAtBottom] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+
+  const update = useCallback(() => {
+    const el = ref.current; if (!el) return;
+    const overflow = el.scrollHeight > el.clientHeight + 1;
+    setHasOverflow(overflow);
+    setAtTop(el.scrollTop <= 0);
+    setAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 1);
+  }, []);
+
+  useEffect(() => { update(); }, [elections, update]);
+
+  const onWheel = useCallback((e) => {
+    const el = ref.current; if (!el) return;
+    
+    // Always handle scroll internally and prevent page scroll when cursor is in container
+    el.scrollTop += e.deltaY;
+    update();
+    e.stopPropagation();
+    e.preventDefault();
+  }, [update]);
+
+  return (
+    <div className="relative">
+      <div
+        ref={ref}
+        onScroll={update}
+        onWheel={onWheel}
+        className="max-h-[calc(100vh-12rem)] overflow-y-auto pr-1 scroll-smooth custom-scrollbar"
+        style={{ 
+          overscrollBehavior: 'contain',
+          maskImage: hasOverflow ? `linear-gradient(to bottom, ${
+            atTop ? 'black' : 'transparent 0, black 2rem'
+          }, black, ${
+            atBottom ? 'black' : 'black calc(100% - 2rem), transparent'
+          })` : undefined,
+          WebkitMaskImage: hasOverflow ? `linear-gradient(to bottom, ${
+            atTop ? 'black' : 'transparent 0, black 2rem'
+          }, black, ${
+            atBottom ? 'black' : 'black calc(100% - 2rem), transparent'
+          })` : undefined
+        }}
+      >
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-6">
+          {elections.map((e) => (
+            <div key={e.electionId} className="group relative">
+              <div className="rounded-xl">
+                <div className="relative rounded-xl border-[1px] border-neutral-200/70 dark:border-neutral-700/30 p-4 bg-white dark:bg-neutral-900/60 text-neutral-900 dark:text-white backdrop-blur-sm transition shadow-sm hover:shadow-md">
+                  <div className="transition duration-200 group-hover:blur-sm group-hover:opacity-70">
+                    <div className="min-w-0 h-32 flex flex-col">
+                      <div className="font-medium text-base truncate">{e.electionName || "Untitled"}</div>
+                      <div className="mt-2 text-xs text-neutral-600 dark:text-neutral-400 line-clamp-3 flex-1">
+                        {e.electionDescription || e.description || "No description available"}
+                      </div>
+                      <div className="mt-4 w-full">
+                        <div className="rounded-md border-[0.5px] border-neutral-300 dark:border-neutral-700 bg-white/60 dark:bg-white/5 px-2 py-1.5 text-[10px] text-neutral-700 dark:text-neutral-200 w-full">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 text-center">
+                              <div className="font-medium">{fmt(e.startTime)}</div>
+                              <div className="text-xs opacity-75">{fmtWithTime(e.startTime).split(' - ')[1]}</div>
+                            </div>
+                            <div className="h-px w-8 bg-neutral-400 dark:bg-neutral-500 my-2"></div>
+                            <div className="flex-1 text-center">
+                              <div className="font-medium">{fmt(e.endTime)}</div>
+                              <div className="text-xs opacity-75">{fmtWithTime(e.endTime).split(' - ')[1]}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-2 pointer-events-auto">
+                      {activeTab === "finished" ? (
+                        <Link href={`/user/election/${e.electionId}/results`}>
+                          <Button size="sm" variant="secondary">Results</Button>
+                        </Link>
+                      ) : (
+                        <Link href={`/user/election/${e.electionId}/edit`}>
+                          <Button size="sm" variant="secondary" disabled={isEditLocked(e.startTime)} title={isEditLocked(e.startTime) ? "Editing locked within 15 minutes of start" : "Edit"}>Edit</Button>
+                        </Link>
+                      )}
+                      <Link href={`/user/election/${e.electionId}`}>
+                        <Button size="sm">View</Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

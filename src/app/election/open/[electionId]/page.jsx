@@ -26,6 +26,7 @@ export default function OpenVotePage() {
       setLoading(true); setError(""); setResultMessage("");
       try {
         const res = await api.findOpenElection({ electionId });
+        console.log("findOpenElection response:", res);
         const info = res?.electionInfo || res;
         setElection(info || null);
         const pt = info?.electionLayout?.pollType || info?.pollType || "radio";
@@ -170,7 +171,7 @@ export default function OpenVotePage() {
                       <rect x="3" y="5" width="18" height="16" rx="2" />
                       <path d="M16 3v4M8 3v4M3 11h18" />
                     </svg>
-                    <span className="text-sm sm:text-base opacity-80">Ends on</span>
+                    <span className="text-sm sm:text-base opacity-80">{endedNow ? "Ended on" : "Ends on"}</span>
                     <span className="text-sm sm:text-base font-medium">{formatEndOn(endMs)}</span>
                   </div>
                 )}
@@ -178,10 +179,12 @@ export default function OpenVotePage() {
               <div className="h-px w-full bg-gradient-to-r from-transparent via-black/20 to-transparent dark:via-white/20 mt-3" />
             </div>
 
-            <div className="mb-3">
-              <h2 className="text-base sm:text-lg font-medium text-inherit">{pollType === "checkbox" ? "Select one or more options" : "Select one option"}</h2>
-              {pollType === "checkbox" && (<div className="text-xs opacity-70 mt-1">Multiple selections allowed</div>)}
-            </div>
+            {!endedNow && (
+              <div className="mb-3">
+                <h2 className="text-base sm:text-lg font-medium text-inherit">{pollType === "checkbox" ? "Select one or more options" : "Select one option"}</h2>
+                {pollType === "checkbox" && (<div className="text-xs opacity-70 mt-1">Multiple selections allowed</div>)}
+              </div>
+            )}
 
             {!endedNow && Array.isArray(election.options) && election.options.length > 0 ? (
               layoutMode === "grid" ? (
@@ -217,9 +220,9 @@ export default function OpenVotePage() {
                   })}
                 </div>
               )
-            ) : (
+            ) : !endedNow ? (
               <div className="text-sm opacity-80">No options available.</div>
-            )}
+            ) : null}
 
             {!endedNow && (
               <div className="mt-6 flex justify-center">

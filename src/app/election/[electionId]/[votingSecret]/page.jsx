@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { useNotifications } from "@/context/NotificationContext";
@@ -23,14 +23,53 @@ export default function PublicVotePage() {
   const [resultMessage, setResultMessage] = useState("");
   const [selectedOptionIds, setSelectedOptionIds] = useState([]);
   const [voted, setVoted] = useState(false);
+  const [rawStatus, setRawStatus] = useState("OK");
+  const [rawMessage, setRawMessage] = useState("");
+  const [redirectTimer, setRedirectTimer] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!electionId) return;
     (async () => {
       setLoading(true); setError(""); setResultMessage("");
       try {
-        const res = await api.findElectionForVoter({ electionId, voterId });
-        const info = res?.electionInfo || res;
+        // We want raw status semantics; the api helper throws on !ok. For this logic we attempt fetch manually.
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8089"}/api/v1/election/find/voter?electionId=${encodeURIComponent(electionId)}&voterId=${encodeURIComponent(voterId)}`;
+        const res = await fetch(url, { method: "GET", credentials: "include" });
+        let data = {};
+        try { const txt = await res.text(); data = txt ? JSON.parse(txt) : {}; } catch { data = {}; }
+        console.log("findElectionForVoter response:", { status: res.status, statusOk: res.ok, data });
+        const statusText = data?.status || data?.Status || data?.code || data?.Code || (res.ok ? "OK" : `HTTP_${res.status}`);
+        setRawStatus(statusText);
+        setRawMessage(data?.message || data?.Message || "");
+        
+        // Check for 308 status code for redirect
+        if (res.status === 308) {
+          setRedirectTimer(5);
+          const interval = setInterval(() => {
+            setRedirectTimer(prev => {
+              if (prev <= 1) {
+                clearInterval(interval);
+                // Redirect using app base URL from env
+                const appBaseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || window.location.origin;
+                window.location.href = `${appBaseUrl}/election/open/${encodeURIComponent(electionId)}`;
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+          return;
+        }
+        
+        if (statusText === "PERMANENT_REDIRECT") {
+          // Just set status, no redirect
+          return;
+        }
+        if (!res.ok || (statusText && statusText !== "OK")) {
+          // Non-OK display scenario; don't populate election
+          return;
+        }
+        const info = data?.electionInfo || data;
         setElection(info || null);
         const pt = info?.electionLayout?.pollType || info?.pollType || "radio";
         if (pt !== "checkbox") {
@@ -137,7 +176,7 @@ export default function PublicVotePage() {
       {loading && <div className="text-sm opacity-80">Loading election…</div>}
   {/* Inline error removed; using notifications */}
 
-      {!loading && !error && election && (
+      {!loading && !error && election && rawStatus === "OK" && (
         <div className="space-y-4">
           <div className="rounded-2xl border-[0.5px] border-black dark:border-white bg-white/50 dark:bg-neutral-900/30 backdrop-blur-2xl p-4 sm:p-5">
             <div className="mb-4 relative">
@@ -230,6 +269,23 @@ export default function PublicVotePage() {
             </div>
           )}
           {/* Inline error removed; using notifications */}
+        </div>
+      )}
+      {!loading && !election && !error && rawStatus !== "OK" && (
+        <div className="flex items-center justify-center py-24">
+          <div className="text-center max-w-xl mx-auto px-4">
+            <div className="text-3xl sm:text-5xl font-semibold tracking-tight opacity-10 select-none break-words whitespace-pre-line">
+              {rawMessage || rawStatus || "Unavailable"}
+            </div>
+            {redirectTimer !== null && (
+              <div className="mt-8">
+                <div className="text-lg font-medium mb-2">Redirecting in</div>
+                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                  {redirectTimer}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -31,11 +31,24 @@ export default function EditElectionPage() {
         const res = await api.findElection({ electionId: id });
         const e = res?.electionInfo || res;
         setOrig(e);
+        // Helper: format date (ms or ISO) to dd/mm/yy - hh:mm format
+        const toLocalInput = (value) => {
+          if (!value) return "";
+          const d = new Date(value);
+          if (isNaN(d.getTime())) return "";
+          const yyyy = d.getFullYear();
+          const yy = String(yyyy).slice(-2);
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const hh = String(d.getHours()).padStart(2, '0');
+          const mi = String(d.getMinutes()).padStart(2, '0');
+          return `${dd}/${mm}/${yy} - ${hh}:${mi}`;
+        };
         setForm({
           electionName: e.electionName || "",
           electionDescription: e.electionDescription || "",
-          startTime: e.startTime ? new Date(e.startTime).toISOString().slice(0,16) : "",
-          endTime: e.endTime ? new Date(e.endTime).toISOString().slice(0,16) : "",
+          startTime: toLocalInput(e.startTime),
+          endTime: toLocalInput(e.endTime),
           isOpen: !!e.isOpen,
           electionLayout: {
             pollType: e.electionLayout?.pollType || "radio",
@@ -49,27 +62,47 @@ export default function EditElectionPage() {
     })();
   }, [id]);
 
-  // Check if election is within 15 minutes of start time
+  // Check if election is within 15 minutes of start time or has ended
   useEffect(() => {
     if (!form?.startTime) return;
     
     const checkLockStatus = () => {
       const now = new Date();
-      const startTime = new Date(form.startTime);
+      const startTime = parseLocalInput(form.startTime);
+      const endTime = form.endTime ? parseLocalInput(form.endTime) : null;
+      
+      if (!startTime) return;
+      
       const timeDiff = startTime.getTime() - now.getTime();
       const minutesDiff = timeDiff / (1000 * 60);
       
-      // Lock if we are within 15 minutes of the start time
-      setIsLocked(minutesDiff <= 15 && minutesDiff > 0);
+      // Lock if we are within 15 minutes of the start time OR if election has ended
+      const isPrelock = minutesDiff <= 15 && minutesDiff > 0;
+      const hasEnded = endTime && now.getTime() > endTime.getTime();
+      
+      setIsLocked(isPrelock || hasEnded);
     };
     
     checkLockStatus();
     const interval = setInterval(checkLockStatus, 30000); // Check every 30 seconds
     
     return () => clearInterval(interval);
-  }, [form?.startTime]);
+  }, [form?.startTime, form?.endTime]);
 
   function updateField(k, v) { setForm((s) => ({ ...s, [k]: v })); }
+  
+  // Helper: parse dd/mm/yy - hh:mm format back to Date
+  const parseLocalInput = (value) => {
+    if (!value) return null;
+    // Expected format: "dd/mm/yy - hh:mm"
+    const match = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
+    if (!match) return null;
+    const [, dd, mm, yy, hh, mi] = match;
+    // Convert 2-digit year to 4-digit (assume 00-30 = 2000-2030, 31-99 = 1931-1999)
+    const yyyy = parseInt(yy) <= 30 ? 2000 + parseInt(yy) : 1900 + parseInt(yy);
+    const date = new Date(yyyy, parseInt(mm) - 1, parseInt(dd), parseInt(hh), parseInt(mi));
+    return isNaN(date.getTime()) ? null : date;
+  };
   function updateLayout(k, v) { setForm((s) => ({ ...s, electionLayout: { ...s.electionLayout, [k]: v } })); }
   function updateArray(field, idx, k, v) {
     setForm((s) => ({ ...s, [field]: s[field].map((it,i) => i===idx ? { ...it, [k]: v } : it ) }));
@@ -95,8 +128,9 @@ export default function EditElectionPage() {
         electionId: id,
         electionName: form.electionName,
         electionDescription: form.electionDescription,
-        startTime: form.startTime ? Date.parse(form.startTime) : null,
-        endTime: form.endTime ? Date.parse(form.endTime) : null,
+        // Parse dd/mm/yy hh:mm format back to ms
+        startTime: form.startTime ? parseLocalInput(form.startTime)?.getTime() : null,
+        endTime: form.endTime ? parseLocalInput(form.endTime)?.getTime() : null,
         isOpen: !!form.isOpen,
         electionLayout: {
           pollType: form.electionLayout?.pollType,
@@ -153,18 +187,32 @@ export default function EditElectionPage() {
 
               {/* Show lock message at the top */}
               {isLocked && (
-                <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-3 rounded-md">
-                  Election is uneditable 15 minutes before the start time.
+                <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-3 rounded-md text-center font-medium">
+                  Election cannot be modified from 15 minutes forth start time.
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className={`space-y-4 ${isLocked ? 'opacity-60 pointer-events-none select-none' : ''}`}>
                 <Input label="Name" value={form.electionName} onChange={(e) => updateField("electionName", e.target.value)} disabled={isLocked} />
                 <TextArea label="Description" value={form.electionDescription} onChange={(e) => updateField("electionDescription", e.target.value)} disabled={isLocked} />
 
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <Input label="Start time" type="datetime-local" value={form.startTime} onChange={(e) => updateField("startTime", e.target.value)} disabled={isLocked} />
-                  <Input label="End time" type="datetime-local" value={form.endTime} onChange={(e) => updateField("endTime", e.target.value)} disabled={isLocked} />
+                  <Input 
+                    label="Start time" 
+                    type="text" 
+                    value={form.startTime} 
+                    onChange={(e) => updateField("startTime", e.target.value)} 
+                    placeholder="dd/mm/yy - hh:mm"
+                    disabled={isLocked} 
+                  />
+                  <Input 
+                    label="End time" 
+                    type="text" 
+                    value={form.endTime} 
+                    onChange={(e) => updateField("endTime", e.target.value)} 
+                    placeholder="dd/mm/yy - hh:mm"
+                    disabled={isLocked} 
+                  />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-3">
