@@ -23,6 +23,7 @@ export default function EditElectionPage() {
   const [isLocked, setIsLocked] = useState(false);
   const [currentOption, setCurrentOption] = useState("");
   const [currentVoter, setCurrentVoter] = useState("");
+  const [timeError, setTimeError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -63,31 +64,32 @@ export default function EditElectionPage() {
   }, [id]);
 
   // Check if election is within 15 minutes of start time or has ended
+  // Uses original persisted times so typing edits doesn't immediately lock the form.
   useEffect(() => {
-    if (!form?.startTime) return;
-    
+    if (!orig?.startTime) return;
+
     const checkLockStatus = () => {
       const now = new Date();
-      const startTime = parseLocalInput(form.startTime);
-      const endTime = form.endTime ? parseLocalInput(form.endTime) : null;
-      
-      if (!startTime) return;
-      
+      const startTime = new Date(orig.startTime);
+      const endTime = orig.endTime ? new Date(orig.endTime) : null;
+
+      if (!startTime || isNaN(startTime.getTime())) return;
+
       const timeDiff = startTime.getTime() - now.getTime();
       const minutesDiff = timeDiff / (1000 * 60);
-      
+
       // Lock if we are within 15 minutes of the start time OR if election has ended
       const isPrelock = minutesDiff <= 15 && minutesDiff > 0;
       const hasEnded = endTime && now.getTime() > endTime.getTime();
-      
+
       setIsLocked(isPrelock || hasEnded);
     };
-    
+
     checkLockStatus();
     const interval = setInterval(checkLockStatus, 30000); // Check every 30 seconds
-    
+
     return () => clearInterval(interval);
-  }, [form?.startTime, form?.endTime]);
+  }, [orig?.startTime, orig?.endTime]);
 
   function updateField(k, v) { setForm((s) => ({ ...s, [k]: v })); }
   
@@ -103,6 +105,18 @@ export default function EditElectionPage() {
     const date = new Date(yyyy, parseInt(mm) - 1, parseInt(dd), parseInt(hh), parseInt(mi));
     return isNaN(date.getTime()) ? null : date;
   };
+
+  const getTimeValidationMessage = (startStr, endStr) => {
+    if (!startStr || !endStr) return "Please fill both start and end times.";
+    const start = parseLocalInput(startStr);
+    const end = parseLocalInput(endStr);
+    if (!start || !end) return "Please enter valid start and end times.";
+    const now = new Date();
+    if (start.getTime() < now.getTime()) return "Start time must be now or in the future.";
+    if (end.getTime() <= start.getTime()) return "End time must be after the start time.";
+    return "";
+  };
+
   function updateLayout(k, v) { setForm((s) => ({ ...s, electionLayout: { ...s.electionLayout, [k]: v } })); }
   function updateArray(field, idx, k, v) {
     setForm((s) => ({ ...s, [field]: s[field].map((it,i) => i===idx ? { ...it, [k]: v } : it ) }));
@@ -123,6 +137,14 @@ export default function EditElectionPage() {
   async function onSave() {
     if (!form) return;
     setSaving(true); setError(""); setMessages([]);
+
+    const timeValidationMsg = getTimeValidationMessage(form.startTime, form.endTime);
+    if (timeValidationMsg) {
+      setSaving(false);
+      setTimeError(timeValidationMsg);
+      setError(timeValidationMsg);
+      return;
+    }
     try {
       const payload = {
         electionId: id,
@@ -160,6 +182,17 @@ export default function EditElectionPage() {
     });
   }, [messages, notifyError, notifySuccess]);
 
+  // Live validate edited times so users see issues before saving
+  useEffect(() => {
+    if (!form) return;
+    if (!form.startTime && !form.endTime) {
+      setTimeError("");
+      return;
+    }
+    const msg = getTimeValidationMessage(form.startTime, form.endTime);
+    setTimeError(msg);
+  }, [form?.startTime, form?.endTime]);
+
   if (loading) return <div className="flex items-center justify-center py-10"><Spinner size={18} /><span className="sr-only">Loading</span></div>;
   if (!form) return <div>Not found</div>;
 
@@ -188,7 +221,7 @@ export default function EditElectionPage() {
               {/* Show lock message at the top */}
               {isLocked && (
                 <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-3 rounded-md text-center font-medium">
-                  Election cannot be modified from 15 minutes forth start time.
+                  Election cannot be modified within 15 minutes of the start time.
                 </div>
               )}
 
@@ -213,6 +246,11 @@ export default function EditElectionPage() {
                     placeholder="dd/mm/yy - hh:mm"
                     disabled={isLocked} 
                   />
+                  {timeError && (
+                    <p className="sm:col-span-2 text-xs text-red-600 dark:text-red-400 mt-1">
+                      {timeError}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-3">

@@ -62,6 +62,15 @@ export default function OpenVotePage() {
     return `${base} grid-cols-1 max-w-[360px] mx-auto`;
   })();
 
+  const startMs = useMemo(() => {
+    const raw = election?.startTime ?? election?.startAt ?? election?.startsAt;
+    if (raw == null) return undefined;
+    const n = Number(raw);
+    if (Number.isFinite(n)) return n;
+    const p = Date.parse(raw);
+    return Number.isFinite(p) ? p : undefined;
+  }, [election]);
+
   const endMs = useMemo(() => {
     const raw = election?.endTime ?? election?.endAt ?? election?.endsAt;
     if (raw == null) return undefined;
@@ -71,6 +80,8 @@ export default function OpenVotePage() {
     return Number.isFinite(p) ? p : undefined;
   }, [election]);
   const endedNow = useMemo(() => (endMs ? Date.now() >= endMs : false), [endMs]);
+
+  const notStartedYet = useMemo(() => (startMs ? Date.now() < startMs : false), [startMs]);
 
   function formatEndOn(ms) {
     if (!ms) return "";
@@ -85,6 +96,8 @@ export default function OpenVotePage() {
     const hh = String(h12).padStart(2, "0");
     return `${dd}/${mm}/${yyyy} - ${hh}:${m} ${suf}`;
   }
+
+  const formatStartOn = formatEndOn;
 
   async function castVote() {
     setSubmitting(true); setResultMessage(""); setError("");
@@ -148,6 +161,8 @@ export default function OpenVotePage() {
     );
   }
 
+  const canVoteNow = !endedNow && !notStartedYet;
+
   return (
     <div className="max-w-3xl mx-auto p-4 text-black dark:text-white font-[Poppins,ui-sans-serif,system-ui]">
       {loading && <div className="text-sm opacity-80">Loading election…</div>}
@@ -179,14 +194,21 @@ export default function OpenVotePage() {
               <div className="h-px w-full bg-gradient-to-r from-transparent via-black/20 to-transparent dark:via-white/20 mt-3" />
             </div>
 
-            {!endedNow && (
+            {notStartedYet && startMs && (
+              <div className="mb-4 rounded-md border-[0.5px] border-amber-400/60 dark:border-amber-300/50 bg-amber-50/80 dark:bg-amber-900/30 px-3 py-2 text-xs sm:text-sm text-amber-900 dark:text-amber-100">
+                <span className="font-medium">This election has not started yet.</span>{" "}
+                Voting will open on <span className="font-semibold">{formatStartOn(startMs)}</span>.
+              </div>
+            )}
+
+            {canVoteNow && (
               <div className="mb-3">
                 <h2 className="text-base sm:text-lg font-medium text-inherit">{pollType === "checkbox" ? "Select one or more options" : "Select one option"}</h2>
                 {pollType === "checkbox" && (<div className="text-xs opacity-70 mt-1">Multiple selections allowed</div>)}
               </div>
             )}
 
-            {!endedNow && Array.isArray(election.options) && election.options.length > 0 ? (
+            {canVoteNow && Array.isArray(election.options) && election.options.length > 0 ? (
               layoutMode === "grid" ? (
                 <div className={gridContainerClass}>
                   {optionsList.map((o) => {
@@ -220,11 +242,11 @@ export default function OpenVotePage() {
                   })}
                 </div>
               )
-            ) : !endedNow ? (
+            ) : canVoteNow ? (
               <div className="text-sm opacity-80">No options available.</div>
             ) : null}
 
-            {!endedNow && (
+            {canVoteNow && (
               <div className="mt-6 flex justify-center">
                 <Button onClick={castVote} disabled={submitting || (pollType === "checkbox" ? selectedOptionIds.length === 0 : !selectedOptionId)}>
                   {submitting ? "Submitting…" : "Cast Vote"}

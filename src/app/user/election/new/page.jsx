@@ -108,6 +108,7 @@ export default function NewElectionPage() {
   const [currentVoter, setCurrentVoter] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [timeError, setTimeError] = useState("");
   const { notifyError, notifySuccess } = useNotifications();
   const [step, setStep] = useState(0); // 0 basics, 1 schedule, 2 layout, 3 options, 4 voters, 5 review
   const startPickerRef = useRef(null);
@@ -172,6 +173,17 @@ export default function NewElectionPage() {
     return toDMY12(d);
   }
 
+  function getTimeValidationMessage(startStr, endStr) {
+    if (!startStr || !endStr) return "Please enter both start and end time.";
+    const start = parseDMYTime12(startStr);
+    const end = parseDMYTime12(endStr);
+    if (!start || !end) return "Please enter valid start and end time.";
+    const now = new Date();
+    if (start.getTime() < now.getTime()) return "Start time must be from the current time or later.";
+    if (end.getTime() <= start.getTime()) return "End time must be after the start time.";
+    return "";
+  }
+
   function updateField(k, v) {
     setForm((s) => ({ ...s, [k]: v }));
   }
@@ -208,7 +220,7 @@ export default function NewElectionPage() {
 
   const canNext = useMemo(() => {
     if (step === 0) return form.electionName.trim().length > 0;
-    if (step === 1) return Boolean(parseDMYTime12(form.startTime) && parseDMYTime12(form.endTime));
+    if (step === 1) return !getTimeValidationMessage(form.startTime, form.endTime);
     if (step === 2) return Boolean(form.electionLayout?.pollType && form.electionLayout?.electionCardId);
     if (step === 3) return form.options.length > 0;
     if (step === 4) return form.isOpen || form.voters.length > 0;
@@ -218,6 +230,14 @@ export default function NewElectionPage() {
   async function submit() {
     setLoading(true);
     setError("");
+
+    const timeValidationMsg = getTimeValidationMessage(form.startTime, form.endTime);
+    if (timeValidationMsg) {
+      setLoading(false);
+      setError(timeValidationMsg);
+      return;
+    }
+
     try {
       const payload = {
         ...form,
@@ -275,6 +295,19 @@ export default function NewElectionPage() {
     { key: "voters", title: "Voters", subtitle: "Add eligible voters" },
     { key: "review", title: "Review", subtitle: "Confirm and create" },
   ];
+
+  useEffect(() => {
+    if (step !== 1) {
+      setTimeError("");
+      return;
+    }
+    if (!form.startTime || !form.endTime) {
+      setTimeError("");
+      return;
+    }
+    const msg = getTimeValidationMessage(form.startTime, form.endTime);
+    setTimeError(msg);
+  }, [step, form.startTime, form.endTime]);
 
   useEffect(() => { if (error) notifyError(error); }, [error, notifyError]);
 
@@ -403,6 +436,11 @@ export default function NewElectionPage() {
                     />
                   </div>
                 </label>
+                  {timeError && (
+                    <p className="sm:col-span-2 text-xs text-red-600 dark:text-red-400 mt-1">
+                      {timeError}
+                    </p>
+                  )}
               </div>
             )}
 
@@ -523,6 +561,18 @@ export default function NewElectionPage() {
                         </Button>
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* Email timing clarification */}
+                {!form.isOpen && (
+                  <div className="mt-4 text-xs text-neutral-700 dark:text-neutral-300">
+                    <p className="leading-relaxed">
+                      All listed voters will get an email about this election
+                      <span className="font-semibold"> 15 minutes before it starts</span>. If there are
+                      fewer than 15 minutes left when you create the election, we will email them
+                      <span className="font-semibold"> immediately after creation</span>.
+                    </p>
                   </div>
                 )}
               </div>
