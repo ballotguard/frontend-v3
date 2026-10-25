@@ -3,124 +3,71 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
-import { Button } from "../../../components/ui/Button";
 import { useNotifications } from "../../../context/NotificationContext";
+import { GoogleSignInButton } from "../../../components/ui/GoogleSignInButton";
+import { Logo } from "../../../components/Logo";
 
 export default function SignupPage() {
-  const { signup } = useAuth();
+  const { googleLogin } = useAuth();
   const router = useRouter();
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const { notifyError, notifySuccess } = useNotifications();
-  const [showPassword, setShowPassword] = useState(false);
 
-  function update(k, v) { setForm((s) => ({ ...s, [k]: v })); }
-
-  async function onSubmit(e) {
-    e.preventDefault();
-    // clear previous ephemeral errors via notification system
+  async function onGoogleSuccess(idToken) {
     setLoading(true);
     try {
-      await signup(form);
-      notifySuccess("Account created. Verify your email.");
-      router.replace("/auth/verify-email");
+      const data = await googleLogin(idToken);
+      notifySuccess(data?.message || "Account created and signed in!");
+      router.replace("/dashboard");
     } catch (err) {
-      notifyError(err?.data?.message || err.message || "Signup failed");
+      notifyError(err?.data?.message || err?.message || "Google sign-in failed");
     } finally {
       setLoading(false);
     }
   }
 
+  function onGoogleError(err) {
+    notifyError(err?.message || "Google sign-in failed. Please try again.");
+  }
+
   return (
-    <div className="relative flex min-h-[70vh] items-center justify-center">
-      <div className="w-full max-w-md rounded-2xl border border-neutral-200/70 dark:border-neutral-700/60 bg-white dark:bg-neutral-900/40 backdrop-blur-xl shadow-lg p-8">
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">Create account</h1>
-          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Join Ballotguard in seconds</p>
+    <div className="w-full flex-1 flex items-center justify-center py-20 px-4">
+      <div className="w-full max-w-sm rounded-lg border border-hairline bg-canvas text-ink p-8 shadow-sm space-y-6">
+        <div className="text-center space-y-2">
+          <div className="mx-auto mb-4">
+            <Logo size={56} href="/" />
+          </div>
+          <h1 className="text-2xl font-medium tracking-tight text-ink">
+            Create an Account
+          </h1>
+          <p className="text-xs text-ink-mute">
+            Join Ballotguard with one-click Google verification
+          </p>
         </div>
 
-  {/* Notifications handled globally */}
+        <div className="space-y-4 pt-2">
+          <GoogleSignInButton
+            onSuccess={onGoogleSuccess}
+            onError={onGoogleError}
+            loading={loading}
+          />
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <label className="flex flex-col gap-1">
-            <span className="text-sm text-neutral-700 dark:text-neutral-300">First name</span>
-            <div className="flex items-center border border-neutral-300 dark:border-neutral-700 rounded-md focus-within:ring-2 focus-within:ring-neutral-900 dark:focus-within:ring-white bg-white dark:bg-neutral-900/30">
-              <input
-                type="text"
-                value={form.firstName}
-                onChange={(e) => update("firstName", e.target.value)}
-                required
-                className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none rounded-md text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500"
-              />
-            </div>
-          </label>
+          <div className="relative flex items-center gap-3 pt-2">
+            <div className="flex-1 border-t border-hairline" />
+            <span className="text-[11px] text-ink-faint uppercase tracking-wider">No password needed</span>
+            <div className="flex-1 border-t border-hairline" />
+          </div>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-sm text-neutral-700 dark:text-neutral-300">Last name</span>
-            <div className="flex items-center border border-neutral-300 dark:border-neutral-700 rounded-md focus-within:ring-2 focus-within:ring-neutral-900 dark:focus-within:ring-white bg-white dark:bg-neutral-900/30">
-              <input
-                type="text"
-                value={form.lastName}
-                onChange={(e) => update("lastName", e.target.value)}
-                required
-                className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none rounded-md text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500"
-              />
-            </div>
-          </label>
+          <p className="text-center text-[11px] text-ink-mute leading-relaxed">
+            Your Google profile securely initializes your voter and administrator credentials without password vulnerability.
+          </p>
+        </div>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-sm text-neutral-700 dark:text-neutral-300">Email</span>
-            <div className="flex items-center border border-neutral-300 dark:border-neutral-700 rounded-md focus-within:ring-2 focus-within:ring-neutral-900 dark:focus-within:ring-white bg-white dark:bg-neutral-900/30">
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => update("email", e.target.value)}
-                required
-                className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none rounded-md text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500"
-              />
-            </div>
-          </label>
-
-          <label className="flex flex-col gap-1">
-            <span className="text-sm text-neutral-700 dark:text-neutral-300">Password</span>
-            <div className="flex items-center border border-neutral-300 dark:border-neutral-700 rounded-md focus-within:ring-2 focus-within:ring-neutral-900 dark:focus-within:ring-white bg-white dark:bg-neutral-900/30">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={(e) => update("password", e.target.value)}
-                required
-                className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none rounded-md text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500"
-              />
-              <button
-                type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                onClick={() => setShowPassword((v) => !v)}
-                className="px-2 h-full flex items-center bg-transparent focus:outline-none"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-neutral-500 dark:text-neutral-400">
-                  {!showPassword ? (
-                    <>
-                      <path d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z" />
-                      <circle cx="12" cy="12" r="3" />
-                      <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" strokeWidth="2" />
-                    </>
-                  ) : (
-                    <>
-                      <path d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </>
-                  )}
-                </svg>
-              </button>
-            </div>
-          </label>
-
-          <Button type="submit" disabled={loading} className="w-full">{loading ? "Creating..." : "Sign up"}</Button>
-        </form>
-
-        <div className="mt-4 flex items-center justify-between text-xs text-neutral-700 dark:text-neutral-300">
-          <span>Have an account?</span>
-          <Link href="/auth/login" className="hover:underline">Login</Link>
+        <div className="text-center text-xs text-ink-mute border-t border-hairline pt-4">
+          Already have an account?{" "}
+          <Link href="/auth/login" className="font-semibold text-primary hover:underline">
+            Sign in
+          </Link>
         </div>
       </div>
     </div>

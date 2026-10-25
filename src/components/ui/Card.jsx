@@ -1,6 +1,19 @@
-export function Card({ children, className = "" }) {
+export function Card({ 
+  children, 
+  variant = "default", 
+  className = "" 
+}) {
+  const variants = {
+    default: "bg-canvas border border-hairline text-ink",
+    soft: "bg-canvas-soft border border-hairline text-ink",
+    featured: "bg-primary border border-hairline-dark text-white",
+    teal: "bg-surface-teal-deep text-white",
+  };
+
+  const selectedVariant = variants[variant] || variants.default;
+
   return (
-    <div className={`border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 bg-white/80 dark:bg-neutral-900/50 backdrop-blur-sm shadow-sm ${className}`}>
+    <div className={`rounded-lg p-6 shadow-sm transition-all ${selectedVariant} ${className}`}>
       {children}
     </div>
   );

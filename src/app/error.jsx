@@ -22,10 +22,6 @@ export default function Error({ error, reset }) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="w-full max-w-xl rounded-2xl border-[0.5px] border-black dark:border-white bg-white/50 dark:bg-neutral-900/30 backdrop-blur-2xl shadow-sm p-6 sm:p-7 relative overflow-hidden text-black dark:text-white text-center">
-        {/* subtle background accents (neutral) */}
-        <div className="pointer-events-none absolute -top-12 -left-12 h-40 w-40 bg-white/20 dark:bg-white/10 blur-3xl rounded-full" />
-        <div className="pointer-events-none absolute -bottom-10 -right-10 h-44 w-44 bg-black/10 dark:bg-white/10 blur-3xl rounded-full" />
-
         <h1 className="text-2xl sm:text-3xl font-semibold">Something went wrong</h1>
         <p className="mt-2 text-neutral-700 dark:text-neutral-300">
           An unexpected error occurred while processing your request.

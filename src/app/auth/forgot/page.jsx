@@ -5,6 +5,7 @@ import { api } from "../../../lib/api";
 import { Button } from "../../../components/ui/Button";
 import { useNotifications } from "../../../context/NotificationContext";
 import Link from "next/link";
+import { Logo } from "../../../components/Logo";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -29,6 +30,9 @@ export default function ForgotPasswordPage() {
     <div className="relative flex min-h-[70vh] items-center justify-center">
       <div className="w-full max-w-md rounded-2xl border border-neutral-200/70 dark:border-neutral-700/60 bg-white dark:bg-neutral-900/40 backdrop-blur-xl shadow-lg p-8">
         <div className="mb-6 text-center">
+          <div className="flex justify-center mb-4">
+            <Logo size={56} href="/" />
+          </div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">Forgot password</h1>
           <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">We'll send a reset code to your email</p>
         </div>

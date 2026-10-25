@@ -1,251 +1,303 @@
+"use client";
+
 import Link from "next/link";
-import { Card } from "../components/ui/Card";
 import { HeroAuthButtons } from "../components/HeroAuthButtons";
+import { Button } from "../components/ui/Button";
+import {
+  ShieldCheck,
+  Zap,
+  Lock,
+  KeyRound,
+  Globe,
+  ScrollText,
+  Mail,
+  BarChart2,
+  Timer,
+  ShieldAlert,
+} from "lucide-react";
 
-function BallotIcon({ className = "w-8 h-8" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="3" y="8" width="18" height="13" rx="2" />
-      <path d="M8 12h8M8 16h5" />
-      <path d="M7 8l4-5h6l-4 5H7z" />
-    </svg>
-  );
-}
-
-function LockIcon({ className = "w-8 h-8" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="3" y="10" width="18" height="11" rx="2" />
-      <path d="M7 10V7a5 5 0 0 1 10 0v3" />
-    </svg>
-  );
-}
-
-function ChartIcon({ className = "w-8 h-8" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M3 3v18h18" />
-      <rect x="7" y="13" width="3" height="5" />
-      <rect x="12" y="9" width="3" height="9" />
-      <rect x="17" y="5" width="3" height="13" />
-    </svg>
-  );
-}
+// Feature Marquee Items
+const MARQUEE_ITEMS = [
+  { icon: ShieldCheck,  title: "End-to-End Encryption" },
+  { icon: Zap,          title: "Instant Real-Time Tally" },
+  { icon: Lock,         title: "Zero-Knowledge Ballots" },
+  { icon: KeyRound,     title: "HMAC-SHA256 Token Sealing" },
+  { icon: Globe,        title: "One-Click Google OAuth" },
+  { icon: ScrollText,   title: "Verifiable Audit Certificates" },
+  { icon: Mail,         title: "Automated SMTP Invitations" },
+  { icon: BarChart2,    title: "Live Turnout Visualizer" },
+  { icon: Timer,        title: "Scheduled Window Control" },
+  { icon: ShieldAlert,  title: "Rate-Limited DDoS Guard" },
+];
 
 export default function Home() {
+  const word1 = "BALLOT";
+  const word2 = "GUARD";
+
   return (
-    <div className="space-y-12">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden p-10 text-center">
-        <h1 className="mx-auto  text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-[#4E74A9] via-[#6B8FBD] to-[#9DB7DF] mb-6 pb-2 ">
-          
-          Secure Digital Voting Platform
-        </h1>
-        <p className="mt-4 text-lg text-neutral-700 dark:text-neutral-300 max-w-2xl mx-auto">
-          Create elections, invite voters, and view results with complete transparency and security.
-        </p>
-  <HeroAuthButtons variant="hero" />
-      </div>
+    <div className="w-full flex flex-col bg-canvas text-ink transition-colors">
+      {/* =========================================================================
+          HERO SECTION: EDITORIAL DARK REGISTER (Canvas 1: Primary Indigo Navy)
+          ========================================================================= */}
+      <section className="relative w-full h-screen flex flex-col pt-16 pb-0 px-6 sm:px-12 md:px-16 hero-atmosphere text-white overflow-hidden select-none">
+        
+        {/* TOP RIGHT CORNER: Motto, Taglines, and Auth CTAs */}
+        <div className="w-full flex justify-end z-10 pt-4 sm:pt-6">
+          <div className="w-full max-w-md lg:max-w-lg flex flex-col items-start lg:items-end text-left lg:text-right space-y-5 animate-fade-down">
+            
+            {/* Eyebrow without bg or border */}
+            <div className="text-surface-violet-soft text-xs font-semibold tracking-widest uppercase">
+              VERIFIABLE VOTING ENGINE
+            </div>
 
-      {/* Informational Panes (full-width stacked) */}
-      <div className="space-y-10">
-        {/* Pane 1: Create Election */}
-  <section className="relative overflow-hidden rounded-3xl border border-[#4E74A9] dark:border-neutral-700/40 backdrop-blur-2xl bg-white/25 dark:bg-neutral-900/25 px-8 py-10 flex flex-col md:flex-row items-stretch gap-10 shadow-lg shadow-neutral-900/5 dark:shadow-none">
-          {/* accents */}
-          <div className="pointer-events-none absolute -top-16 -left-24 h-64 w-64 bg-gradient-to-br from-sky-400/30 via-indigo-400/20 to-transparent blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -right-16 h-72 w-72 bg-gradient-to-tr from-indigo-500/30 via-sky-400/20 to-transparent blur-3xl" />
-          <div className="md:w-5/12 relative z-10 flex flex-col justify-center">
-            <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-4">Create elections in minutes</h3>
-            <p className="text-neutral-700 dark:text-neutral-300 mb-3 text-sm sm:text-base">Define the title, description, allowed voters and precise start / end times inside a guided multi‑step wizard.</p>
-            <p className="text-neutral-600 dark:text-neutral-400 text-sm">Flexible layouts, single or multiple choice polls, and instant validation help you launch confidently.</p>
-            <div className="mt-6 flex gap-3">
+            {/* Editorial Lead Motto */}
+            <p className="text-xl sm:text-2xl font-normal leading-snug tracking-tight text-white/95 text-balance">
+              Democracy in high fidelity. Cryptographically sealed, verifiable digital elections built for modern organizations.
+            </p>
+
+            <p className="text-xs sm:text-sm text-white/70 leading-relaxed max-w-sm">
+              Eliminate ballot stuffing and voter tampering with cryptographic HMAC tokens, instant real-time tallies, and audit proofs.
+            </p>
+
+            {/* Single hero pill CTA in pale violet */}
+            <div className="pt-2">
+              <HeroAuthButtons variant="hero" />
             </div>
           </div>
-          {/* Visual mock / right side */}
-          <div className="relative z-10 md:flex-1 grid place-items-center">
-            <div className="w-full max-w-md aspect-[5/4] rounded-2xl border border-neutral-300/60 dark:border-neutral-700/50 bg-white/60 dark:bg-neutral-800/40 backdrop-blur-xl p-5 shadow-sm flex flex-col space-y-4">
-              {/* Title field (skeleton) */}
-              <div>
-                <div className="h-3 w-16 mb-1 rounded bg-neutral-300/70 dark:bg-neutral-600/60" />
-                <div className="h-9 rounded-md border border-neutral-300/70 dark:border-neutral-600/60 bg-white/80 dark:bg-neutral-700/50 flex items-center px-3">
-                  <div className="h-3 w-2/3 rounded bg-neutral-300/70 dark:bg-neutral-500/70" />
-                </div>
-                <div className="mt-2 space-y-1">
-                  <div className="h-2 w-5/6 rounded bg-neutral-300/60 dark:bg-neutral-600/60" />
-                  <div className="h-2 w-2/5 rounded bg-neutral-300/50 dark:bg-neutral-700/50" />
-                </div>
-              </div>
-              {/* Description field (skeleton) */}
-              <div>
-                <div className="h-3 w-24 mb-1 rounded bg-neutral-300/70 dark:bg-neutral-600/60" />
-                <div className="h-16 rounded-md border border-neutral-300/70 dark:border-neutral-600/60 bg-white/80 dark:bg-neutral-700/50 p-3 space-y-2">
-                  <div className="h-2.5 w-4/5 rounded bg-neutral-300/70 dark:bg-neutral-500/70" />
-                  <div className="h-2 w-3/4 rounded bg-neutral-300/60 dark:bg-neutral-600/60" />
-                  <div className="h-2 w-1/2 rounded bg-neutral-300/60 dark:bg-neutral-600/60" />
-                </div>
-              </div>
-              {/* Time + toggle condensed */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-9 rounded-md border border-neutral-300/70 dark:border-neutral-600/60 bg-white/80 dark:bg-neutral-700/50 flex items-center px-3 gap-2">
-                  <div className="h-3 w-1/3 rounded bg-neutral-300/70 dark:bg-neutral-500/70" />
-                  <div className="h-3 w-8 rounded bg-neutral-300/50 dark:bg-neutral-600/60" />
-                </div>
-              </div>
-              
-              {/* Group: Options */}
-              <div className="flex items-center justify-between mt-0.5">
-                <div className="text-[11px] font-semibold tracking-wide text-neutral-700 dark:text-neutral-300 uppercase">Options</div>
-                <div className="flex items-center gap-1">
-                  <div className="h-5 w-5 rounded-md border border-neutral-300/70 dark:border-neutral-600/60 bg-white/70 dark:bg-neutral-700/50 flex items-center justify-center text-neutral-500 text-[11px]">+</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {['Option A','Option B','Option C'].map((label,i)=>(
-                  <div key={i} className="h-10 rounded-md border border-neutral-300/70 dark:border-neutral-600/60 bg-white/80 dark:bg-neutral-700/50 flex items-center px-2">
-                    <span className="text-[11px] font-medium text-neutral-700 dark:text-neutral-300 truncate">{label}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Group: Voters */}
-              <div className="flex items-center justify-between mt-2">
-                <div className="text-[11px] font-semibold tracking-wide text-neutral-700 dark:text-neutral-300 uppercase">Voters</div>
-                <div className="flex items-center gap-1">
-                  <div className="h-5 w-5 rounded-md border border-neutral-300/70 dark:border-neutral-600/60 bg-white/70 dark:bg-neutral-700/50 flex items-center justify-center text-neutral-500 text-[11px]">+</div>
-                </div>
-              </div>
-              <div className="mt-1 grid grid-cols-3 gap-2">
-                {['alice@example.com','bob@example.com','carol@example.com'].map(e => (
-                  <div key={e} className="rounded-md border border-neutral-300/60 dark:border-neutral-600/60 bg-white/70 dark:bg-neutral-700/50 px-2 py-1 flex items-center">
-                    <span className="text-[10px] truncate text-neutral-600 dark:text-neutral-300">{e}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Action buttons skeleton */}
-              <div className="mt-auto pt-2 flex justify-center gap-3 w-full">
-                <div className="h-9 w-20 rounded-md border border-neutral-300/70  dark:border-neutral-600/60 bg-neutral-600 text-white dark:bg-neutral-700/50 flex items-center justify-center text-sm" >Create</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pane 2: Secure Email & Voting (visual left for alternation) */}
-  <section className="relative overflow-hidden rounded-3xl border border-[#4E74A9] dark:border-neutral-700/40 backdrop-blur-2xl bg-white/25 dark:bg-neutral-900/25 px-8 py-10 flex flex-col md:flex-row-reverse items-stretch gap-10 shadow-lg shadow-neutral-900/5 dark:shadow-none">
-          <div className="pointer-events-none absolute -top-14 -right-24 h-60 w-60 bg-gradient-to-br from-emerald-400/30 via-teal-400/25 to-transparent blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 bg-gradient-to-tr from-teal-500/30 via-emerald-400/20 to-transparent blur-3xl" />
-          <div className="md:w-5/12 relative z-10 flex flex-col justify-center">
-            <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-4">Secure voter delivery</h3>
-            <p className="text-neutral-700 dark:text-neutral-300 mb-3 text-sm sm:text-base">Unique access links sent to every authorized voter ensure one‑voter‑one‑vote integrity.</p>
-            <p className="text-neutral-600 dark:text-neutral-400 text-sm">Tokenized invitations, open / closed modes and automatic restriction against duplicate ballots.</p>
-          </div>
-          {/* Email mock (left on desktop via row-reverse) */}
-          <div className="relative z-10 md:flex-1 grid place-items-center">
-            <div className="w-full max-w-md aspect-[5/4] rounded-2xl border border-neutral-300/60 dark:border-neutral-700/50 bg-white/60 dark:bg-neutral-800/40 backdrop-blur-xl p-5 shadow-sm flex flex-col">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
-                <div className="h-3 w-3 rounded-full bg-teal-400/70" />
-                <div className="h-3 w-3 rounded-full bg-emerald-300/70" />
-                <div className="ml-auto h-3 w-16 rounded bg-neutral-300/70 dark:bg-neutral-600/60" />
-              </div>
-              <div className="space-y-2 overflow-hidden">
-                {Array.from({length:7}).map((_,i)=>(
-                  <div key={i} className="flex items-start gap-3 rounded-lg border border-neutral-300/60 dark:border-neutral-600/50 bg-white/70 dark:bg-neutral-700/40 px-3 py-2">
-                    <div className="h-8 w-8 rounded-md bg-gradient-to-br from-emerald-400/70 to-teal-400/70 flex items-center justify-center text-[10px] font-medium text-white/90">
-                      {i===0 ? 'BG' : ''}
-                    </div>
-                    <div className="flex-1 py-0.5 space-y-1.5">
-                      {i===0 ? (
-                        <>
-                          <div className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Ballotguard</div>
-                          <div className="text-[11px] text-neutral-600 dark:text-neutral-400">Your vote is requested</div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="h-2 w-2/3 rounded bg-neutral-300/80 dark:bg-neutral-500/70" />
-                          <div className="h-1.5 w-1/2 rounded bg-neutral-300/60 dark:bg-neutral-600/60" />
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pane 3: Results */}
-  <section className="relative overflow-hidden rounded-3xl border border-[#4E74A9] dark:border-neutral-700/40 backdrop-blur-2xl bg-white/25 dark:bg-neutral-900/25 px-8 py-10 flex flex-col md:flex-row items-stretch gap-10 shadow-lg shadow-neutral-900/5 dark:shadow-none">
-          <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 bg-gradient-to-br from-fuchsia-400/30 via-violet-400/25 to-transparent blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 bg-gradient-to-tr from-violet-500/30 via-fuchsia-400/20 to-transparent blur-3xl" />
-          <div className="md:w-5/12 relative z-10 flex flex-col justify-center">
-            <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-4">Transparent results & auditability</h3>
-            <p className="text-neutral-700 dark:text-neutral-300 mb-3 text-sm sm:text-base">Live vote counts, ranked option distribution and automatic sharing of final tallies with every voter.</p>
-            <p className="text-neutral-600 dark:text-neutral-400 text-sm">Post‑election, voter and option lists let participants verify no outsider cast a ballot.</p>
-          </div>
-          {/* Results mock */}
-          <div className="relative z-10 md:flex-1 grid place-items-center">
-            <div className="w-full max-w-md aspect-[5/4] rounded-2xl border border-neutral-300/60 dark:border-neutral-700/50 bg-white/60 dark:bg-neutral-800/40 backdrop-blur-xl p-5 shadow-sm flex flex-col">
-              <div className="relative flex items-start gap-3 mb-4">
-                <div className="h-7 w-1.5 rounded-full bg-gradient-to-b from-fuchsia-500/70 to-violet-500/70" />
-                <div className="min-w-0">
-                  <h4 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-white">Results</h4>
-                  <div className="text-[11px] opacity-70 text-neutral-600 dark:text-neutral-400">Election name</div>
-                </div>
-                <div className="ml-auto shrink-0 inline-flex items-center gap-2 rounded-full bg-white/60 dark:bg-neutral-900/40 px-3 py-1.5">
-                  <span className="text-[11px] opacity-70">Votes</span>
-                  <span className="text-xs font-medium">128</span>
-                  <span className="opacity-40">/</span>
-                  <span className="text-[11px] opacity-70">Voters</span>
-                  <span className="text-xs font-medium">128</span>
-                </div>
-              </div>
-              <ul className="space-y-3 relative">
-                {Array.from({length:5}).map((_,i)=>{
-                  const pct = 78 - i*11;
-                  return (
-                    <li key={i} className="group rounded-xl border border-neutral-300/60 dark:border-neutral-600/50 bg-white/70 dark:bg-neutral-700/40 backdrop-blur p-3">
-                      <div className="flex items-center justify-between gap-3 mb-2">
-                        <div className="truncate text-sm font-medium text-neutral-800 dark:text-neutral-200">Option {i+1}</div>
-                        <div className="shrink-0 text-xs opacity-80 tabular-nums text-neutral-600 dark:text-neutral-400">{Math.max(pct-5,0)} • {pct}%</div>
-                      </div>
-                      <div className="h-3 rounded-full bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-600 overflow-hidden">
-                        <div style={{width:`${pct}%`}} className="h-full rounded-full bg-gradient-to-r from-fuchsia-400/80 via-violet-500/80 to-fuchsia-500/80" />
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-              <div className="mt-auto pt-4 grid grid-cols-3 gap-2 text-[10px] text-neutral-500 dark:text-neutral-400">
-                <div className="text-center">
-                  <div className="font-medium text-neutral-700 dark:text-neutral-200 text-xs">128</div>
-                  <div>Votes</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-neutral-700 dark:text-neutral-200 text-xs">100%</div>
-                  <div>Turnout</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-neutral-700 dark:text-neutral-200 text-xs">5</div>
-                  <div>Options</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-     
-  {/* CTA Section */}
-      <div className="text-center py-8">
-        <div className="p-8">
-          <h2 className="text-3xl font-semibold mb-4 text-neutral-900 dark:text-white">
-            Ready to start your first election?
-          </h2>
-          <p className="text-neutral-600 dark:text-neutral-300 mb-6">
-            Join thousands of organizations using Ballotguard for secure, transparent voting.
-          </p>
-          <HeroAuthButtons variant="cta" />
         </div>
-      </div>
+
+        {/* BALLOTGUARD Display — sits below tagline */}
+        <div className="w-full z-10 mt-4 pb-14">
+          <div className="flex flex-col">
+            <span className="text-xs uppercase tracking-widest text-surface-violet-soft/75 font-semibold mb-2">
+              01 // TRUST ARCHITECTURE
+            </span>
+
+            {/* Giant stacked title: BALLOT / GUARD */}
+            <h1
+              className="flex flex-col leading-[0.85] tracking-[-0.05em] font-semibold text-white"
+              aria-label="BallotGuard"
+            >
+              <span className="flex flex-wrap text-[18vw] sm:text-[18vw] lg:text-[18vw] xl:text-[22vh]">
+                {word1.split("").map((char, index) => (
+                  <span key={`w1-${index}`} className="char-container">
+                    <span
+                      className="char-animated inline-block text-white"
+                      style={{ animationDelay: `${index * 55 + 80}ms` }}
+                    >
+                      {char}
+                    </span>
+                  </span>
+                ))}
+              </span>
+              <span className="flex flex-wrap text-[18vw] sm:text-[18vw] lg:text-[18vw] xl:text-[22vh]">
+                {word2.split("").map((char, index) => (
+                  <span key={`w2-${index}`} className="char-container">
+                    <span
+                      className="char-animated inline-block text-white"
+                      style={{ animationDelay: `${(word1.length + index) * 55 + 80}ms` }}
+                    >
+                      {char}
+                    </span>
+                  </span>
+                ))}
+              </span>
+            </h1>
+          </div>
+        </div>
+
+        {/* MARQUEE — absolutely pinned to bottom of hero, always in viewport */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 bg-white/5 border-t border-white/10 backdrop-blur-sm py-3 overflow-hidden">
+          <div className="marquee-track flex items-center gap-6 select-none">
+            {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, idx) => (
+              <div
+                key={idx}
+                className="inline-flex items-center gap-2 text-white/70 text-xs font-medium tracking-tight whitespace-nowrap hover:text-white/100 transition-colors"
+              >
+                <span className="opacity-60">
+                  {(() => { const Icon = item.icon; return <Icon size={12} strokeWidth={1.8} />; })()}
+                </span>
+                <span>{item.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          BODY SECTION: WHITE CANVAS (Canvas 2: Clean Editorial Feature Breakdown)
+          ========================================================================= */}
+      <section className="w-full max-w-6xl mx-auto px-6 sm:px-12 py-24 space-y-24">
+        
+        {/* Section Opener */}
+        <div className="max-w-2xl">
+          <span className="text-xs uppercase tracking-wider text-ink-mute font-semibold">
+            System Guarantees
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-1.32px] leading-[0.96] text-ink mt-3">
+            Uncompromising integrity for every vote cast.
+          </h2>
+          <p className="text-base sm:text-lg text-ink-mute leading-relaxed mt-5">
+            Designed for institutional governance, academic elections, shareholder decisions, and community polls that demand unquestionable proof of results.
+          </p>
+        </div>
+
+        {/* Feature Row 1: HMAC Cryptographic Sealing */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center p-8 sm:p-12 rounded-lg bg-canvas-soft border border-hairline">
+          <div className="space-y-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-surface-teal-deep">
+              02 / Cryptographic Security
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-medium tracking-[-0.63px] leading-[1.14] text-ink">
+              Tamper-proof HMAC ballot tokens.
+            </h3>
+            <p className="text-sm text-ink-mute leading-relaxed">
+              Every voter receives a cryptographically generated, one-time secret token hashed with the election&apos;s master key. Ballots cannot be intercepted, replayed, or cast by unauthorized parties.
+            </p>
+            <ul className="space-y-2 pt-2 text-xs text-ink-mute">
+              <li className="flex items-center gap-2">
+                <span className="text-primary font-bold">—</span>
+                HmacSHA256 signature verification on every submitted ballot
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-primary font-bold">—</span>
+                Strict single-vote enforcement per cryptographic credential
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-primary font-bold">—</span>
+                Absolute separation between voter identity and ballot choice
+              </li>
+            </ul>
+          </div>
+
+          {/* Interactive UI Representation */}
+          <div className="p-6 rounded-lg bg-canvas border border-hairline shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-hairline pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">VALIDATED</span>
+                <span className="text-xs font-mono font-medium text-ink">HMAC_VERIFIER</span>
+              </div>
+              <span className="text-[11px] font-mono text-ink-faint">256-bit Key</span>
+            </div>
+
+            <div className="space-y-2 font-mono text-xs">
+              <div className="p-2.5 rounded bg-canvas-soft text-ink-mute">
+                <span className="text-ink-faint block text-[10px]">VOTING SECRET HASH</span>
+                <span className="text-ink break-all">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
+              </div>
+              <div className="p-2.5 rounded bg-canvas-soft text-ink-mute flex items-center justify-between">
+                <span>STATUS: CIPHER_LOCKED</span>
+                <span className="text-emerald-700 font-semibold text-[11px]">VERIFIED ✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Row 2: One-Click Google Authentication & Voter Lists */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center p-8 sm:p-12 rounded-lg bg-canvas border border-hairline">
+          {/* Visual UI Representation */}
+          <div className="order-2 md:order-1 p-6 rounded-lg bg-canvas-soft border border-hairline shadow-sm space-y-3">
+            <div className="text-xs font-medium text-ink flex items-center justify-between">
+              <span>Imported Voter Roster</span>
+              <span className="text-[11px] text-ink-mute">240 Eligible Voters</span>
+            </div>
+            
+            <div className="space-y-2">
+              {[
+                { email: "sarah.connor@university.edu", status: "Invitation Sent", ok: true },
+                { email: "alex.thorne@organization.org", status: "Ballot Cast", ok: true },
+                { email: "elena.rostova@academics.org", status: "Ballot Cast", ok: true },
+              ].map((row, i) => (
+                <div key={i} className="flex items-center justify-between p-2.5 rounded bg-canvas border border-hairline text-xs">
+                  <span className="font-mono text-ink">{row.email}</span>
+                  <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                    {row.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="order-1 md:order-2 space-y-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-surface-teal-deep">
+              02 / Authentication &amp; Delivery
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-medium tracking-[-0.63px] leading-[1.14] text-ink">
+              One-click Google login &amp; confidential email delivery.
+            </h3>
+            <p className="text-sm text-ink-mute leading-relaxed">
+              No passwords to remember or compromise. Organizers authenticate seamlessly via Google OAuth, while voters receive personalized, sealed ballot links dispatched directly through your configured SMTP service.
+            </p>
+            <div className="pt-2">
+              <Link href="/auth/login">
+                <Button variant="secondary" size="md">
+                  Explore Authentication Flow →
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Row 3: Live Real-Time Analytics & Audit Records */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center p-8 sm:p-12 rounded-lg bg-canvas-soft border border-hairline">
+          <div className="space-y-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-surface-teal-deep">
+              03 / Real-Time Tally
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-medium tracking-[-0.63px] leading-[1.14] text-ink">
+              Live turnout telemetry &amp; certified audit certificates.
+            </h3>
+            <p className="text-sm text-ink-mute leading-relaxed">
+              Observe voter turnout in real-time through low-latency WebSockets. Once an election ends, the system locks the tally permanently and produces verifiable cryptographic summary certificates.
+            </p>
+          </div>
+
+          {/* Turnout Mock UI */}
+          <div className="p-6 rounded-lg bg-canvas border border-hairline shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-ink">Executive Council Election 2026</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
+                LIVE
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-medium text-ink-mute">
+                <span>Turnout Progress</span>
+                <span className="text-ink font-semibold">84.2%</span>
+              </div>
+              <div className="w-full h-2 rounded-sm bg-canvas-soft overflow-hidden border border-hairline">
+                <div className="h-full bg-primary rounded-sm" style={{ width: "84.2%" }} />
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center justify-between text-xs text-ink-mute border-t border-hairline">
+              <span>Votes Verified: 421 / 500</span>
+              <span className="font-mono text-[10px]">TALLY_SEALED::OK</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          CLOSING CTA BAND: DEEP TEAL (Canvas 3: Surface Teal Deep)
+          ========================================================================= */}
+      <section className="w-full bg-surface-teal-deep text-white py-24 sm:py-32 px-6 sm:px-12 flex flex-col items-center justify-center text-center relative overflow-hidden">
+        <div className="max-w-2xl mx-auto space-y-6 z-10">
+          <span className="text-xs uppercase tracking-widest text-emerald-300 font-semibold">
+            SECURE DEMOCRACY AWAITS
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-1.32px] leading-[0.96] text-white">
+            Ready to run your next election with mathematical certainty?
+          </h2>
+          <p className="text-sm sm:text-base text-white/80 leading-relaxed max-w-lg mx-auto">
+            Create an election in less than three minutes, distribute sealed tokens, and watch verifiable results stream in.
+          </p>
+          <div className="pt-4 flex justify-center">
+            <HeroAuthButtons variant="teal" />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

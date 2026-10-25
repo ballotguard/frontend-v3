@@ -180,10 +180,7 @@ export default function PublicVotePage() {
         <div className="space-y-4">
           <div className="rounded-2xl border-[0.5px] border-black dark:border-white bg-white/50 dark:bg-neutral-900/30 backdrop-blur-2xl p-4 sm:p-5">
             <div className="mb-4 relative">
-              <div className="pointer-events-none absolute -top-8 -left-6 h-24 w-24 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 blur-2xl rounded-full" />
-              <div className="pointer-events-none absolute -bottom-8 -right-6 h-24 w-24 bg-gradient-to-br from-cyan-500/15 to-indigo-500/15 blur-2xl rounded-full" />
               <div className="relative flex items-start gap-3">
-                <div className="h-7 w-1.5 rounded-full bg-gradient-to-b from-indigo-500/70 to-cyan-500/70" />
                 <div className="min-w-0">
                   <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-inherit truncate">{election.electionName}</h1>
                   {election.electionDescription && (<p className="text-sm opacity-80 mt-0.5 line-clamp-3">{election.electionDescription}</p>)}

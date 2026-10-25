@@ -2,443 +2,118 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #292827;
+    --canvas-soft: #fafaf8;
+    --hairline: #e8e4dd;
+    --primary: #1b1938;
+    --primary-deep: #0e0c1f;
+    --violet-soft: #c9b4fa;
+    --teal-deep: #0e3030;
+    --ink: #292827;
+    --ink-mute: #73706d;
+    --ink-faint: #9a9794;
+  }
+
+  :root.dark {
+    --background: #0e0c1f;
+    --foreground: #ffffff;
+    --canvas-soft: #17152d;
+    --hairline: #3f3a52;
+    --primary: #1b1938;
+    --primary-deep: #0e0c1f;
+    --violet-soft: #c9b4fa;
+    --teal-deep: #0e3030;
+    --ink: #f2f0ea;
+    --ink-mute: #a9a6b5;
+    --ink-faint: #747185;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-:root.dark {
-  --background: #020617;
-  --foreground: #ededed;
+/* Atmospheric Hero Backdrop */
+.hero-atmosphere {
+  background-color: #1b1938;
+  background-image: 
+    radial-gradient(ellipse 70% 60% at 75% 20%, rgba(201, 180, 250, 0.22) 0%, rgba(27, 25, 56, 0) 70%),
+    radial-gradient(ellipse 60% 50% at 20% 85%, rgba(107, 143, 189, 0.18) 0%, rgba(27, 25, 56, 0) 65%),
+    radial-gradient(circle at 50% 50%, #1b1938 0%, #0e0c1f 100%);
 }
 
-/* =============================================
-   Colorful Button (Full Recolor + Hover Redesign)
-   ============================================= */
-.colorful-button {
-  /* Core timing */
-  --duration: 3.4s;
-  --delay: 0s;
-  --easing: linear;
-  /* Unified palette (dark base + hero darkest accent #4E74A9) */
-  --accent: #4E74A9;
-  --c-color-1: rgba(109,170,255,0.14);
-  --c-color-2: rgba(109,170,255,0.24);
-  --c-color-3: rgba(109,170,255,0.46);
-  --c-color-4: rgba(157,183,223,0.22);
-  --c-shadow: rgba(78,116,169,0.45);
-  --c-shadow-inset-top: rgba(109,170,255,0.25);
-  --c-shadow-inset-bottom: rgba(109,170,255,0.50);
-  --c-radial-inner: #4E74A9;
-  --c-radial-outer: #2E4662; /* removed black */
-  --c-radial-highlight: #6B8FBD;
-  --c-color: #fff;
-  --pointer-x: 0px;
-  --pointer-y: 0px;
-  --pointer-px: 50%;
-  --pointer-py: 50%;
-  --distort-strength: 0.10;
-  
-  -webkit-tap-highlight-color: transparent;
-  -webkit-appearance: none;
-  appearance: none;
-  outline: none;
-  position: relative;
-  cursor: pointer;
-  border: 1px solid rgba(109,170,255,0.25);
-  display: inline-block;
-  border-radius: 8px; /* Changed from 24px to 8px for less rounded corners */
-  padding: 0;
-  margin: 0;
-  text-align: center;
+/* Hero Huge Letter Mask / Animation */
+.char-container {
   overflow: hidden;
-  min-width: 140px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  letter-spacing: 0.02em;
-  line-height: 1.5;
-  color: var(--c-color);
-  background: radial-gradient(circle at 40% 50%, var(--c-radial-inner) 0%, var(--c-radial-outer) 85%);
-  box-shadow: 0 0 14px -6px var(--c-shadow), 0 0 24px -14px var(--c-radial-highlight);
-  transition: background .3s ease, box-shadow .35s ease;
-}
-
-/* Inner gloss + border halo */
-.colorful-button:before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  /* Removed constant sweeping white gloss; keep only a subtle, pointer-reactive highlight on hover */
-  background: radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(255,255,255,0.28), rgba(255,255,255,0) 55%);
-  mix-blend-mode: screen;
-  pointer-events: none;
-  opacity: 0; /* hidden by default */
-  transition: opacity .35s ease;
-}
-
-/* Show subtle highlight only during hover/focus interactions */
-.colorful-button:hover:before,
-.colorful-button:focus-visible:before { opacity: .75; }
-
-/* Watery / ripple overlay following pointer */
-/* Liquid lens highlight */
-.colorful-button:after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 3;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(255,255,255,0.55), rgba(255,255,255,0) 40%),
-    radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(137,174,224,0.35), rgba(137,174,224,0) 65%);
-  mix-blend-mode: overlay;
-  opacity: 0;
-  transform: translateZ(0);
-  transition: opacity .35s ease;
-}
-
-/* Ensure :after glow is completely hidden when not hovering */
-.colorful-button:not(:hover):after {
-  opacity: 0 !important;
-}
-
-/* Enhanced hover: subtle lift + luminous edge + internal highlight */
-.colorful-button:hover:after {
-  opacity: .55;
-  background:
-    radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(255,255,255,0.40), rgba(255,255,255,0) 42%),
-    radial-gradient(circle at var(--pointer-px) var(--pointer-py), rgba(137,174,224,0.30), rgba(137,174,224,0) 65%);
-}
-.colorful-button:hover {
-  border-color: rgba(137,174,224,0.55);
-  box-shadow:
-    0 3px 6px -2px rgba(20,34,48,0.6),
-    0 0 0 1px rgba(137,174,224,0.25),
-    0 0 22px -6px rgba(137,174,224,0.55),
-    0 0 54px -12px rgba(109,170,255,0.45);
-  /* Removed translate/scale to eliminate post-first-hover jump */
-  transition: box-shadow .35s ease, border-color .25s ease;
-}
-
-/* Focus-visible for keyboard users */
-.colorful-button:focus-visible {
-  outline: 2px solid #89AEE0;
-  outline-offset: 3px;
-}
-
-.colorful-button:active { transform: none; }
-
-.colorful-button .wrapper {
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  mask-image: radial-gradient(white, black);
-  overflow: hidden;
-  border-radius: 8px; /* Changed from 24px to 8px for less rounded corners */
-  min-width: 120px;
-  padding: 12px 0;
-  position: relative;
-}
-
-.colorful-button .wrapper span {
   display: inline-block;
-  position: relative;
-  z-index: 1;
+  line-height: 0.85;
 }
 
-.colorful-button .circle {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  filter: blur(var(--blur, 10px)) brightness(1.05);
-  background: var(--background, transparent);
-  transform: translate(calc(var(--x, 0) + var(--pointer-x) * var(--distort-strength)), calc(var(--y, 0) + var(--pointer-y) * var(--distort-strength))) translateZ(0);
-  animation: none; /* Disable animations by default to prevent persistent glow */
-  opacity: .9;
-  transition: transform .25s ease, opacity .4s ease;
+.char-animated {
+  display: inline-block;
+  transform: translateY(115%);
+  animation: charSlideUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.colorful-button .circle.circle-1,
-.colorful-button .circle.circle-9,
-.colorful-button .circle.circle-10 {
-  --background: var(--c-color-4);
-}
-
-.colorful-button .circle.circle-3,
-.colorful-button .circle.circle-4 {
-  --background: var(--c-color-2);
-  --blur: 14px;
-}
-
-.colorful-button .circle.circle-5,
-.colorful-button .circle.circle-6 {
-  --background: var(--c-color-3);
-  --blur: 16px;
-}
-
-.colorful-button .circle.circle-2,
-.colorful-button .circle.circle-7,
-.colorful-button .circle.circle-8,
-.colorful-button .circle.circle-11,
-.colorful-button .circle.circle-12 {
-  --background: var(--c-color-1);
-  --blur: 12px;
-}
-
-.colorful-button .circle.circle-1 {
-  --x: 0;
-  --y: -40px;
-  --animation: circle-1;
-}
-
-/* Right bias adjustments: move several circles further to the right */
-/* Right bias retained but tuned for new scale */
-.colorful-button .circle.circle-2 { --x: 205px; --y: 10px; --animation: circle-2; }
-
-.colorful-button .circle.circle-3 {
-  --x: -12px;
-  --y: -12px;
-  --animation: circle-3;
-}
-
-.colorful-button .circle.circle-4 { --x: 215px; --y: -20px; --animation: circle-4; }
-
-.colorful-button .circle.circle-5 {
-  --x: 12px;
-  --y: -4px;
-  --animation: circle-5;
-}
-
-.colorful-button .circle.circle-6 { --x: 220px; --y: 24px; --animation: circle-6; }
-
-.colorful-button .circle.circle-7 {
-  --x: 8px;
-  --y: 28px;
-  --animation: circle-7;
-}
-
-.colorful-button .circle.circle-8 {
-  --x: 28px;
-  --y: -4px;
-  --animation: circle-8;
-}
-
-.colorful-button .circle.circle-9 {
-  --x: 20px;
-  --y: -12px;
-  --animation: circle-9;
-}
-
-.colorful-button .circle.circle-10 { --x: 228px; --y: 22px; --animation: circle-10; }
-
-.colorful-button .circle.circle-11 {
-  --x: 4px;
-  --y: 4px;
-  --animation: circle-11;
-}
-
-.colorful-button .circle.circle-12 { --blur: 18px; --x: 230px; --y: 12px; --animation: circle-12; }
-
-/* Removed hover animation trigger to prevent persistent left-to-right glow */
-/* .colorful-button:hover .circle { animation-duration: var(--duration); } */
-
-/* Secondary variant keeps same palette but subtle brightness tweak */
-.colorful-button.secondary { filter: brightness(1.06) saturate(1.1); }
-
-/* Gradient animation */
-/* Removed gradient shift animation */
-
-/* Light-mode specific lightening of darkest tones to better match hero gradient */
-html:not(.dark) .colorful-button {
-  --c-radial-inner: #6B8FBD; /* lighter center */
-  --c-radial-outer: #4E74A9; /* hero base */
-  --c-radial-highlight: #9DB7DF; /* lighter highlight */
-  --c-shadow: rgba(110,140,180,0.35);
-  border-color: rgba(110,140,180,0.40);
-  background: radial-gradient(circle at 40% 50%, var(--c-radial-inner) 0%, var(--c-radial-outer) 85%);
-  box-shadow: 0 0 10px -4px rgba(110,140,180,0.45), 0 0 20px -10px rgba(157,183,223,0.50);
-}
-html:not(.dark) .colorful-button:hover {
-  border-color: rgba(110,140,180,0.65);
-  box-shadow:
-    0 3px 6px -2px rgba(60,86,120,0.30),
-    0 0 0 1px rgba(110,140,180,0.30),
-    0 0 26px -8px rgba(137,174,224,0.60),
-    0 0 54px -12px rgba(157,183,223,0.55);
-}
-
-/* =============================================
-   Nav link subtle hover underline / bg effect
-   ============================================= */
-.nav-link {
-  position: relative;
-  padding: 0.4rem 0.55rem;
-  border-radius: 6px;
-  line-height: 1.1;
-  font-weight: 500;
-  transition: color .25s ease, background-color .25s ease;
-}
-
-.nav-link:after {
-  content: "";
-  position: absolute;
-  left: 10%;
-  right: 10%;
-  bottom: 4px;
-  height: 2px;
-  background: linear-gradient(90deg,#4E74A9,#6B8FBD);
-  border-radius: 2px;
-  transform: scaleX(0);
-  transform-origin: 25% 50%;
-  transition: transform .35s cubic-bezier(.65,.05,.36,1);
-  pointer-events: none;
-}
-
-.nav-link:hover {
-  color: #4E74A9;
-  background-color: rgba(110,140,180,0.08);
-}
-.dark .nav-link:hover {
-  color: #9DB7DF;
-  background-color: rgba(155,190,230,0.10);
-}
-
-.nav-link:hover:after { transform: scaleX(1); }
-
-.nav-link:focus-visible {
-  outline: 2px solid #4E74A9;
-  outline-offset: 3px;
-}
-.dark .nav-link:focus-visible { outline-color: #6B8FBD; }
-
-
-/* Keyframes for circle animations */
-@keyframes circle-1 {
-  33% {
-    transform: translate(0px, 16px) translateZ(0);
+@keyframes charSlideUp {
+  0% {
+    transform: translateY(115%);
+    opacity: 0;
   }
-  66% {
-    transform: translate(12px, 64px) translateZ(0);
+  100% {
+    transform: translateY(0%);
+    opacity: 1;
   }
 }
 
-@keyframes circle-2 {
-  33% {
-    transform: translate(160px, -10px) translateZ(0);
+/* Marquee infinite ticker */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 32s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
   }
-  66% {
-    transform: translate(140px, -48px) translateZ(0);
+  100% {
+    transform: translateX(-50%);
   }
 }
 
-@keyframes circle-3 {
-  33% {
-    transform: translate(20px, 12px) translateZ(0);
-  }
-  66% {
-    transform: translate(12px, 4px) translateZ(0);
-  }
-}
-
-@keyframes circle-4 {
-  33% {
-    transform: translate(160px, -12px) translateZ(0);
-  }
-  66% {
-    transform: translate(180px, -8px) translateZ(0);
-  }
-}
-
-@keyframes circle-5 {
-  33% {
-    transform: translate(40px, 28px) translateZ(0);
-  }
-  66% {
-    transform: translate(80px, -32px) translateZ(0);
-  }
-}
-
-@keyframes circle-6 {
-  33% {
-    transform: translate(160px, -16px) translateZ(0);
-  }
-  66% {
-    transform: translate(180px, -56px) translateZ(0);
-  }
-}
-
-@keyframes circle-7 {
-  33% {
-    transform: translate(8px, 28px) translateZ(0);
-  }
-  66% {
-    transform: translate(20px, -60px) translateZ(0);
-  }
-}
-
-@keyframes circle-8 {
-  33% {
-    transform: translate(32px, -4px) translateZ(0);
-  }
-  66% {
-    transform: translate(56px, -20px) translateZ(0);
-  }
-}
-
-@keyframes circle-9 {
-  33% {
-    transform: translate(20px, -12px) translateZ(0);
-  }
-  66% {
-    transform: translate(60px, -8px) translateZ(0);
-  }
-}
-
-@keyframes circle-10 {
-  33% {
-    transform: translate(160px, 20px) translateZ(0);
-  }
-  66% {
-    transform: translate(180px, 28px) translateZ(0);
-  }
-}
-
-@keyframes circle-11 {
-  33% {
-    transform: translate(4px, 4px) translateZ(0);
-  }
-  66% {
-    transform: translate(40px, 20px) translateZ(0);
-  }
-}
-
-@keyframes circle-12 {
-  33% {
-    transform: translate(160px, 0px) translateZ(0);
-  }
-  66% {
-    transform: translate(180px, -32px) translateZ(0);
-  }
-}
-
-/* Completely hide scrollbars everywhere (while keeping scroll functionality) */
-/* Firefox */
+/* Subtle editorial scrollbar */
 * {
-  scrollbar-width: none; /* Hide scrollbar in Firefox */
-  -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 180, 250, 0.2) transparent;
 }
-/* WebKit-based browsers (Chrome, Safari, new Edge, Opera) */
+
 *::-webkit-scrollbar {
-  width: 0 !important;
-  height: 0 !important;
+  width: 6px;
+  height: 6px;
 }
-*::-webkit-scrollbar-thumb,
+
 *::-webkit-scrollbar-track {
-  background: transparent !important;
-  border: none !important;
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(201, 180, 250, 0.2);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 180, 250, 0.4);
 }

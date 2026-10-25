@@ -18,7 +18,6 @@ export function AuthProvider({ children }) {
           const data = await api.getUser();
           if (data?.userInfo) {
             setUser(data.userInfo);
-            // Save user data to localStorage from API response
             const userData = {
               name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
               firstName: data.userInfo.firstName,
@@ -42,13 +41,11 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     loading,
     async verifyAndRefreshSession() {
-      // Attempt a refresh if possible; then fetch user to validate session
       try {
         await api.refreshAuth?.();
         const data = await api.getUser();
         if (data?.userInfo) {
           setUser(data.userInfo);
-          // Save user data to localStorage from API response
           const userData = {
             name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
             firstName: data.userInfo.firstName,
@@ -62,27 +59,10 @@ export function AuthProvider({ children }) {
         return false;
       }
     },
-    async login(email, password) {
-      const data = await api.login({ email, password });
+    async googleLogin(idToken) {
+      const data = await api.googleAuth({ idToken });
       setAuthSession(data);
       setUser(data.userInfo);
-      // Save user data to localStorage from API response
-      if (data.userInfo) {
-        const userData = {
-          name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
-          firstName: data.userInfo.firstName,
-          lastName: data.userInfo.lastName,
-          email: data.userInfo.email
-        };
-        storage.set(TOKEN_KEYS.user, userData);
-      }
-      return data;
-    },
-    async signup(payload) {
-      const data = await api.signup(payload);
-      setAuthSession(data);
-      setUser(data.userInfo);
-      // Save user data to localStorage from API response
       if (data.userInfo) {
         const userData = {
           name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
@@ -98,7 +78,6 @@ export function AuthProvider({ children }) {
       const data = await api.getUser();
       if (data?.userInfo) {
         setUser(data.userInfo);
-        // Save user data to localStorage from API response
         const userData = {
           name: data.userInfo.name || `${data.userInfo.firstName || ''} ${data.userInfo.lastName || ''}`.trim(),
           firstName: data.userInfo.firstName,
@@ -112,7 +91,6 @@ export function AuthProvider({ children }) {
     logout() {
       clearAuthSession();
       setUser(null);
-      // Clear user data from localStorage
       storage.remove(TOKEN_KEYS.user);
     },
   }), [user, loading]);

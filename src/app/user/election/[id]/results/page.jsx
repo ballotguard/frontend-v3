@@ -57,11 +57,7 @@ export default function ElectionResultsPage() {
           <>
             {result ? (
               <div className="rounded-2xl border-[0.5px] border-black dark:border-white bg-white/50 dark:bg-neutral-900/30 backdrop-blur-2xl p-5 sm:p-6 relative overflow-hidden">
-                {/* blurred animated accents to match Overview/Edit */}
-                <div className="pointer-events-none absolute -top-12 -left-12 h-40 w-40 bg-white/30 dark:bg-white/10 blur-3xl rounded-full animate-float" />
-                <div className="pointer-events-none absolute -bottom-10 -right-10 h-44 w-44 bg-black/10 dark:bg-white/10 blur-3xl rounded-full animate-float-delayed" />
                 <div className="relative flex items-start gap-3 mb-4">
-                  <div className="h-7 w-1.5 rounded-full bg-gradient-to-b from-indigo-500/70 to-cyan-500/70" />
                   <div className="min-w-0">
                     <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-inherit truncate">Results</h1>
                     <div className="text-xs sm:text-sm opacity-80 mt-0.5 truncate">{result.electionName}</div>

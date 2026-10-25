@@ -1,4 +1,4 @@
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
@@ -8,40 +8,47 @@ import { NavBar } from "../components/NavBar";
 import { ClientRouteLoadingOverlay } from "../components/RouteLoadingOverlay";
 import { ThemeBackground } from "../components/ThemeBackground";
 import { Footer } from "../components/Footer";
+import { PageContainer } from "../components/PageContainer";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
-const poppins = Poppins({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300","400","500","600","700"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata = {
   title: "Ballotguard - Secure Voting Platform",
-  description: "Create elections, invite voters, and view results securely.",
+  description: "Cryptographically verifiable election platform for modern organizations.",
   icons: {
-    icon: '/icon.svg'
+    icon: '/logo.png'
   }
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-  <body className={`${poppins.className} antialiased`} suppressHydrationWarning>
-        <AuthProvider>
-          <ThemeProvider>
-            <NotificationProvider>
-            <ThemeBackground>
-              <div className="min-h-screen flex flex-col">
-                <NavBar />
-                <Suspense fallback={null}>
-                  <ClientRouteLoadingOverlay />
-                </Suspense>
-                <main className="max-w-5xl mx-auto px-4 pt-24 pb-8 flex-1 w-full">{children}</main>
-                <Footer />
-              </div>
-            </ThemeBackground>
-            </NotificationProvider>
-          </ThemeProvider>
-        </AuthProvider>
+      <body className={`${inter.variable} font-sans antialiased bg-canvas text-ink`} suppressHydrationWarning>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+          <AuthProvider>
+            <ThemeProvider>
+              <NotificationProvider>
+                <ThemeBackground>
+                  <div className="min-h-screen flex flex-col">
+                    <NavBar />
+                    <Suspense fallback={null}>
+                      <ClientRouteLoadingOverlay />
+                    </Suspense>
+                    <main className="flex-1 w-full flex flex-col">
+                      <PageContainer>{children}</PageContainer>
+                    </main>
+                    <Footer />
+                  </div>
+                </ThemeBackground>
+              </NotificationProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

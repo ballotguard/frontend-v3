@@ -34,7 +34,7 @@
 
 /out/
 
-
+DESIGN.md
 
 # production
 
@@ -62,7 +62,10 @@ yarn-error.log*
 
 
 
-# env files (can opt-in for committing if needed)
+# env files
+.env
+.env*.local
+!.env.local.example
 
 
 

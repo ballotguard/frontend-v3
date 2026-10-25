@@ -143,9 +143,8 @@ async function queueRefreshJwt() {
 }
 
 export const api = {
-  // Auth
-  signup: (payload) => request(`/api/v1/auth/signup`, { method: "POST", body: payload }),
-  login: (payload) => request(`/api/v1/auth/login`, { method: "POST", body: payload }),
+  // Auth - Google OAuth only
+  googleAuth: (payload) => request(`/api/v1/auth/google`, { method: "POST", body: payload, auth: false }),
   sendEmailVerification: () => request(`/api/v1/auth/email-verification/code`, { method: "POST" }),
   verifyEmailCode: (payload) => request(`/api/v1/auth/email-verification/verify`, { method: "POST", body: payload }),
   sendResetCode: (payload) => request(`/api/v1/auth/password-reset/code`, { method: "POST", body: payload }),

@@ -1,13 +1,14 @@
 "use client";
+
 export function Input({ label, error, className = "", ...props }) {
   return (
-    <label className={`flex flex-col gap-1 ${className}`}>
-      {label && <span className="text-sm text-inherit opacity-80">{label}</span>}
+    <label className={`flex flex-col gap-1.5 ${className}`}>
+      {label && <span className="text-xs font-medium text-ink-mute">{label}</span>}
       <input
-        className="rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white border-[0.5px] border-black/30 dark:border-white/30 bg-white dark:bg-neutral-900/30 text-inherit placeholder:text-neutral-500 dark:placeholder:text-neutral-400 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="rounded-sm px-3.5 py-2.5 text-sm bg-canvas text-ink border border-hairline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-ink-faint transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         {...props}
       />
-      {error && <span className="text-xs text-red-600">{error}</span>}
+      {error && <span className="text-xs text-red-600 font-medium">{error}</span>}
     </label>
   );
 }

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { api } from "../../lib/api";
 import { AuthGuard } from "../../components/AuthGuard";
 import { Button } from "../../components/ui/Button";
-import { ColorfulButton } from "../../components/ui/ColorfulButton";
 import { useNotifications } from "../../context/NotificationContext";
 import { useAuth } from "../../context/AuthContext";
 import { Spinner } from "../../components/ui/Spinner";
@@ -159,48 +158,41 @@ export default function DashboardPage() {
 
   return (
     <AuthGuard>
-      <div className="flex gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar */}
-        <aside className="w-64 shrink-0">
-          <div className="rounded-2xl border border-neutral-200/70 dark:border-neutral-700/30 bg-white/80 border-[1px] dark:bg-neutral-900/70 backdrop-blur-xl p-4 sticky top-24">
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">Filters</h2>
+        <aside className="w-full md:w-64 shrink-0">
+          <div className="rounded-lg border border-hairline bg-canvas p-4 sticky top-24 shadow-sm space-y-4">
+            <div>
+              <h2 className="text-xs uppercase tracking-wider font-semibold text-ink-mute">Status Filter</h2>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-row md:flex-col gap-1.5">
               {["upcoming","running","finished"].map((key) => {
-                const label = key.charAt(0).toUpperCase() + key.slice(1) + ` (${categorized[key].length})`;
-                let base = "w-full text-left px-3 py-2 rounded-md border transition";
-                let selected = activeTab === key;
-                let darkText = "dark:text-neutral-300";
-                let style = {};
-                if (key === "upcoming") {
-                  darkText = "dark:text-white";
-                  style = {};
-                }
-                let className = selected
-                  ? `border-neutral-900 dark:border-white ${darkText} ${key === "upcoming" ? "text-[#222] dark:text-white" : "text-neutral-900"}`
-                  : `border-neutral-300/70 dark:border-neutral-700/60 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 ${darkText} ${key === "upcoming" ? "text-[#222] dark:text-white" : "text-neutral-700"}`;
-
-                // Ensure Upcoming tab color is correct in both themes
-                if (key === "upcoming") {
-                  className = selected
-                    ? `border-neutral-900 dark:border-white text-black dark:text-white`
-                    : `border-neutral-300/70 dark:border-neutral-700/60 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 text-black dark:text-white`;
-                }
+                const label = key.charAt(0).toUpperCase() + key.slice(1);
+                const count = categorized[key].length;
+                const selected = activeTab === key;
                 return (
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`${base} ${className}${key === "upcoming" ? "" : ""} ${key === "upcoming" ? "text-black dark:text-white" : ""}`}
+                    className={`flex-1 md:w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md border transition-all ${
+                      selected
+                        ? "bg-primary text-white border-primary shadow-sm"
+                        : "bg-canvas-soft text-ink border-hairline hover:bg-canvas"
+                    }`}
                   >
-                    {label}
+                    <span>{label}</span>
+                    <span className={`text-[11px] px-1.5 py-0.5 rounded font-mono ${
+                      selected ? "bg-white/20 text-white" : "bg-black/5 dark:bg-white/10 text-ink-mute"
+                    }`}>
+                      {count}
+                    </span>
                   </button>
                 );
               })}
             </div>
             {/* Date filters */}
-            <div className="mt-6 space-y-3">
-              <div className="text-xs font-semibold tracking-wide text-neutral-700 dark:text-neutral-300">Dates</div>
+            <div className="pt-2 border-t border-hairline space-y-3">
+              <div className="text-xs font-semibold tracking-wide text-ink">Date Filter</div>
               <label className="flex flex-col gap-1">
                 <span className="text-xs text-neutral-600 dark:text-neutral-400">Start on or after</span>
                 <div className="flex items-center justify-between gap-2 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900/30 focus-within:ring-2 focus-within:ring-neutral-900 dark:focus-within:ring-white px-2 py-1.5">
@@ -282,12 +274,15 @@ export default function DashboardPage() {
 
         {/* Content */}
         <section className="flex-1">
-          <div className="mb-4 flex items-center justify-between">
-            <h1 className="text-xl font-semibold capitalize text-neutral-900 dark:text-white">{activeTab} elections</h1>
-            <div className="flex gap-3">
-              <Button variant="secondary" onClick={load} className="bg-neutral-800 text-white hover:bg-neutral-900 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-neutral-100 w-36 h-[47px] mt-[1px]">Refresh</Button>
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-medium capitalize text-ink tracking-tight">{activeTab} Elections</h1>
+              <p className="text-xs text-ink-mute mt-0.5">Manage and monitor live ballot telemetry</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" size="md" onClick={load}>Refresh</Button>
               <Link href="/user/election/new">
-                <ColorfulButton variant="secondary" width="160px">Create election</ColorfulButton>
+                <Button variant="primary" size="md">Create Election</Button>
               </Link>
             </div>
           </div>
@@ -355,46 +350,46 @@ function ScrollableCards({ elections, activeTab, fmt, fmtWithTime, isEditLocked 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-6">
           {elections.map((e) => (
             <div key={e.electionId} className="group relative">
-              <div className="rounded-xl">
-                <div className="relative rounded-xl border-[1px] border-neutral-200/70 dark:border-neutral-700/30 p-4 bg-white dark:bg-neutral-900/60 text-neutral-900 dark:text-white backdrop-blur-sm transition shadow-sm hover:shadow-md">
-                  <div className="transition duration-200 group-hover:blur-sm group-hover:opacity-70">
-                    <div className="min-w-0 h-32 flex flex-col">
-                      <div className="font-medium text-base truncate">{e.electionName || "Untitled"}</div>
-                      <div className="mt-2 text-xs text-neutral-600 dark:text-neutral-400 line-clamp-3 flex-1">
+              <div className="relative rounded-lg border border-hairline p-5 bg-canvas text-ink shadow-sm hover:shadow-md transition-all">
+                <div className="transition duration-200 group-hover:blur-[2px] group-hover:opacity-40">
+                  <div className="min-w-0 h-32 flex flex-col justify-between">
+                    <div>
+                      <div className="font-semibold text-base truncate text-ink">{e.electionName || "Untitled"}</div>
+                      <div className="mt-1.5 text-xs text-ink-mute line-clamp-2">
                         {e.electionDescription || e.description || "No description available"}
                       </div>
-                      <div className="mt-4 w-full">
-                        <div className="rounded-md border-[0.5px] border-neutral-300 dark:border-neutral-700 bg-white/60 dark:bg-white/5 px-2 py-1.5 text-[10px] text-neutral-700 dark:text-neutral-200 w-full">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1 text-center">
-                              <div className="font-medium">{fmt(e.startTime)}</div>
-                              <div className="text-xs opacity-75">{fmtWithTime(e.startTime).split(' - ')[1]}</div>
-                            </div>
-                            <div className="h-px w-8 bg-neutral-400 dark:bg-neutral-500 my-2"></div>
-                            <div className="flex-1 text-center">
-                              <div className="font-medium">{fmt(e.endTime)}</div>
-                              <div className="text-xs opacity-75">{fmtWithTime(e.endTime).split(' - ')[1]}</div>
-                            </div>
+                    </div>
+                    <div className="w-full mt-3">
+                      <div className="rounded-md border border-hairline bg-canvas-soft px-3 py-2 text-[11px] text-ink w-full">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 text-center">
+                            <div className="font-medium text-ink">{fmt(e.startTime)}</div>
+                            <div className="text-[10px] text-ink-mute">{fmtWithTime(e.startTime).split(' - ')[1]}</div>
+                          </div>
+                          <div className="h-px w-6 bg-hairline my-2" />
+                          <div className="flex-1 text-center">
+                            <div className="font-medium text-ink">{fmt(e.endTime)}</div>
+                            <div className="text-[10px] text-ink-mute">{fmtWithTime(e.endTime).split(' - ')[1]}</div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="flex gap-2 pointer-events-auto">
-                      {activeTab === "finished" ? (
-                        <Link href={`/user/election/${e.electionId}/results`}>
-                          <Button size="sm" variant="secondary">Results</Button>
-                        </Link>
-                      ) : (
-                        <Link href={`/user/election/${e.electionId}/edit`}>
-                          <Button size="sm" variant="secondary" disabled={isEditLocked(e.startTime)} title={isEditLocked(e.startTime) ? "Editing locked within 15 minutes of start" : "Edit"}>Edit</Button>
-                        </Link>
-                      )}
-                      <Link href={`/user/election/${e.electionId}`}>
-                        <Button size="sm">View</Button>
+                </div>
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-2 pointer-events-auto">
+                    {activeTab === "finished" ? (
+                      <Link href={`/user/election/${e.electionId}/results`}>
+                        <Button size="sm" variant="secondary">Results</Button>
                       </Link>
-                    </div>
+                    ) : (
+                      <Link href={`/user/election/${e.electionId}/edit`}>
+                        <Button size="sm" variant="secondary" disabled={isEditLocked(e.startTime)} title={isEditLocked(e.startTime) ? "Editing locked within 15 minutes of start" : "Edit"}>Edit</Button>
+                      </Link>
+                    )}
+                    <Link href={`/user/election/${e.electionId}`}>
+                      <Button size="sm" variant="primary">View</Button>
+                    </Link>
                   </div>
                 </div>
               </div>

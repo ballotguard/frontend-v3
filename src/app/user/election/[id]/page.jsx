@@ -70,9 +70,6 @@ export default function ElectionManagePage() {
   return (
     <AuthGuard>
   <div className="rounded-2xl border-[0.5px] border-black dark:border-white bg-white/50 dark:bg-neutral-900/30 backdrop-blur-2xl shadow-sm p-5 sm:p-6 relative overflow-hidden text-black dark:text-white">
-        <div className="pointer-events-none absolute -top-12 -left-12 h-40 w-40 bg-white/30 dark:bg-white/10 blur-3xl rounded-full animate-float" />
-        <div className="pointer-events-none absolute -bottom-10 -right-10 h-44 w-44 bg-black/10 dark:bg-white/10 blur-3xl rounded-full animate-float-delayed" />
-
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-semibold text-inherit">Election Details</h1>
           <div className="flex gap-2">

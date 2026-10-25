@@ -1,23 +1,30 @@
 "use client";
+import { Logo } from "./Logo";
 
 export function Footer() {
   return (
-  <footer className="mt-16">
-      <div
-    className="border border-neutral-200/40 dark:border-neutral-700/40 px-4 py-6 text-sm text-neutral-700 dark:text-neutral-300"
-        style={{
-          backgroundImage: "linear-gradient(90deg, rgba(228,218,253,0.10), rgba(228,218,253,0.05))",
-          backgroundColor: "rgba(228,218,253,0.06)",
-          backdropFilter: "blur(1px)",
-        }}
-      >
-        <div className="max-w-5xl mx-auto flex flex-col items-center gap-2 text-center">
-          <div className="flex items-center gap-3">
-            <a className="hover:underline" href="mailto:ballotguard@gmail.com">Contact Us</a>
-            <span className="text-neutral-400">|</span>
-            <a className="hover:underline" href="https://github.com/ballotguard" target="_blank" rel="noreferrer">Development Repositories</a>
+    <footer className="w-full bg-canvas border-t border-hairline py-12 px-6 sm:px-12 mt-auto transition-colors">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Logo size={22} href="/" />
+            <span className="font-semibold text-sm tracking-tight text-ink">
+              Ballotguard
+            </span>
           </div>
-          <div className="text-xs">© {new Date().getFullYear()} Ballotguard | All rights reserved</div>
+          <p className="text-xs text-ink-mute mt-1 max-w-sm">
+            Cryptographically verified election platform built for high-stakes governance and transparency.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 text-xs text-ink-mute">
+          <a href="mailto:ballotguard@gmail.com" className="hover:text-ink transition-colors">
+            ballotguard@gmail.com
+          </a>
+          <a href="https://github.com/ballotguard" target="_blank" rel="noreferrer" className="hover:text-ink transition-colors">
+            GitHub
+          </a>
+          <span>© {new Date().getFullYear()} Ballotguard</span>
         </div>
       </div>
     </footer>
